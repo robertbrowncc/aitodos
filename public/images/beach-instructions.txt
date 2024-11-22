@@ -1,0 +1,13 @@
+Please add a high-resolution beach image named 'beach.jpg' in this directory.
+
+Recommended image specifications:
+- Resolution: At least 1920x1080 pixels
+- File format: JPG
+- Content: A beautiful sunny beach with clear blue ocean
+- Style: Natural, bright, and calming
+- Size: Optimized for web (ideally under 500KB)
+
+Example image search terms:
+"tropical beach background"
+"sunny beach ocean horizon"
+"paradise beach background"
