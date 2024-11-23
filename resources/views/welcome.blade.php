@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Todo App 🐱')
+@section('title', '🏠 Hizzle Management')
 
 @section('content')
     <div id="app"></div>
