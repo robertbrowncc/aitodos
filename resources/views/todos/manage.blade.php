@@ -18,7 +18,7 @@
 @section('app-class', 'pt-24 pb-8')
 
 @section('content')
-    <div id="vue-app" class="max-w-4xl mx-auto px-4">
+    <div class="max-w-4xl mx-auto px-4">
         <div id="todo-list"></div>
     </div>
 @endsection

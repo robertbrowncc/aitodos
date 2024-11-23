@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Person;
 
 class Todo extends Model
 {
@@ -11,11 +12,17 @@ class Todo extends Model
 
     protected $fillable = [
         'name',
+        'completed',
         'url',
-        'done'
+        'person_id'
     ];
 
     protected $casts = [
-        'done' => 'boolean'
+        'completed' => 'boolean',
     ];
+
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
 }
