@@ -102,6 +102,12 @@
     </div>
 
     <div v-else class="space-y-4">
+      <div class="text-sm text-gray-600 mb-2 bg-blue-50 p-3 rounded-lg flex items-center">
+        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Keyboard shortcuts: Press <kbd class="px-2 py-1 bg-white rounded border shadow-sm mx-1">E</kbd> to expand all days, <kbd class="px-2 py-1 bg-white rounded border shadow-sm mx-1">C</kbd> to collapse all
+      </div>
       <div v-for="(activitiesByDay, day) in groupedActivities" :key="day" class="bg-white rounded-lg shadow">
         <button 
           @click="toggleDay(day)"
@@ -165,7 +171,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const activities = ref([])
 const people = ref([])
@@ -286,8 +292,40 @@ const toggleDay = (day) => {
   expandedDays.value[day] = !expandedDays.value[day]
 }
 
+const expandAll = () => {
+  daysOfWeek.forEach(day => {
+    expandedDays.value[day] = true
+  })
+}
+
+const collapseAll = () => {
+  daysOfWeek.forEach(day => {
+    expandedDays.value[day] = false
+  })
+}
+
+const handleKeyPress = (event) => {
+  // Only respond to keypresses if not in an input field
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+    return
+  }
+  
+  if (event.key.toLowerCase() === 'e') {
+    expandAll()
+  } else if (event.key.toLowerCase() === 'c') {
+    collapseAll()
+  }
+}
+
 onMounted(() => {
   fetchActivities()
   fetchPeople()
+  // Add keyboard event listener
+  window.addEventListener('keydown', handleKeyPress)
+})
+
+onUnmounted(() => {
+  // Remove keyboard event listener when component is destroyed
+  window.removeEventListener('keydown', handleKeyPress)
 })
 </script>
