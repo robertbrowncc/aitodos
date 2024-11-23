@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\PersonSeeder;
 use Database\Seeders\TodoSeeder;
+use Database\Seeders\ActivitySeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PersonSeeder::class,
             TodoSeeder::class,
+            ActivitySeeder::class,
         ]);
     }
 }
