@@ -222,18 +222,26 @@ const addTodo = async () => {
 const toggleTodo = async (todo) => {
   error.value = null
   try {
+    const requestBody = {
+      completed: !todo.completed,
+      person_id: todo.person_id || null
+    };
+    console.log('Sending update request:', requestBody);
+    
     const response = await fetch(`/api/todos/${todo.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       },
-      body: JSON.stringify({
-        completed: !todo.completed
-      })
+      body: JSON.stringify(requestBody)
     })
 
-    if (!response.ok) throw new Error('Failed to update todo')
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Server response:', errorData);
+      throw new Error('Failed to update todo');
+    }
     
     const updatedTodo = await response.json()
     const index = todos.value.findIndex(t => t.id === todo.id)
@@ -247,18 +255,26 @@ const toggleTodo = async (todo) => {
 const updateAssignment = async (todo) => {
   error.value = null
   try {
+    const requestBody = {
+      person_id: todo.person_id || null,
+      completed: todo.completed
+    };
+    console.log('Sending update request:', requestBody);
+    
     const response = await fetch(`/api/todos/${todo.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       },
-      body: JSON.stringify({
-        person_id: todo.person_id || null
-      })
+      body: JSON.stringify(requestBody)
     })
 
-    if (!response.ok) throw new Error('Failed to update assignment')
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Server response:', errorData);
+      throw new Error('Failed to update assignment');
+    }
     
     const updatedTodo = await response.json()
     const index = todos.value.findIndex(t => t.id === todo.id)

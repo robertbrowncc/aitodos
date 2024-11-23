@@ -27,11 +27,15 @@ class TodoController extends Controller
 
     public function update(Request $request, Todo $todo)
     {
+        \Log::info('Todo update request:', $request->all());
+        
         $validated = $request->validate([
-            'completed' => 'boolean',
+            'completed' => 'required|boolean',
             'person_id' => 'nullable|exists:people,id'
         ]);
 
+        \Log::info('Validated data:', $validated);
+        
         $todo->update($validated);
         return $todo->load('person');
     }
