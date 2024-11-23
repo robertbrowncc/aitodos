@@ -1,7 +1,27 @@
 <template>
   <div class="max-w-2xl mx-auto">
     <div class="mb-6">
-      <form @submit.prevent="addTodo" class="space-y-4 bg-white p-6 rounded-lg shadow-md mb-8">
+      <button 
+        @click="showAddForm = !showAddForm"
+        class="w-full flex justify-between items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mb-2"
+      >
+        <span class="text-lg font-medium text-blue-800">Add New Todo</span>
+        <svg 
+          class="w-6 h-6 text-blue-800 transform transition-transform"
+          :class="{ 'rotate-180': showAddForm }"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <form 
+        v-show="showAddForm"
+        @submit.prevent="addTodo" 
+        class="space-y-4 bg-white p-6 rounded-lg shadow-md mb-8"
+      >
         <div>
           <label for="todoName" class="block text-sm font-medium text-blue-800">Task Name</label>
           <input 
@@ -106,6 +126,7 @@ export default {
     return {
       todos: [],
       people: [],
+      showAddForm: false,
       newTodo: {
         name: '',
         url: '',
