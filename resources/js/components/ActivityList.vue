@@ -102,39 +102,60 @@
     </div>
 
     <div v-else class="space-y-4">
-      <div v-for="(activitiesByDay, day) in groupedActivities" :key="day" class="bg-white p-6 rounded-lg shadow">
-        <h3 class="text-lg font-semibold text-purple-800 mb-4">{{ day }}</h3>
-        <div class="space-y-4">
-          <div v-for="activity in activitiesByDay" :key="activity.id" 
-               class="flex justify-between items-start p-4 border border-gray-200 rounded-lg hover:bg-purple-50">
-            <div>
-              <div class="font-medium">{{ activity.name }}</div>
-              <div class="text-sm text-gray-600">
-                {{ activity.person.first_name }} {{ activity.person.last_name }}
+      <div v-for="(activitiesByDay, day) in groupedActivities" :key="day" class="bg-white rounded-lg shadow">
+        <button 
+          @click="toggleDay(day)"
+          class="w-full flex justify-between items-center p-4 text-left hover:bg-purple-50 transition-colors rounded-lg"
+          :class="{ 'rounded-b-none': expandedDays[day] }"
+        >
+          <div>
+            <h3 class="text-lg font-semibold text-purple-800">{{ day }}</h3>
+            <span class="text-sm text-gray-600">{{ activitiesByDay.length }} activities</span>
+          </div>
+          <svg 
+            class="w-6 h-6 text-purple-800 transform transition-transform"
+            :class="{ 'rotate-180': expandedDays[day] }"
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        
+        <div v-show="expandedDays[day]" class="p-4 border-t border-gray-200">
+          <div class="space-y-4">
+            <div v-for="activity in activitiesByDay" :key="activity.id" 
+                 class="flex justify-between items-start p-4 border border-gray-200 rounded-lg hover:bg-purple-50">
+              <div>
+                <div class="font-medium">{{ activity.name }}</div>
+                <div class="text-sm text-gray-600">
+                  {{ activity.person.first_name }} {{ activity.person.last_name }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}
+                </div>
               </div>
-              <div class="text-sm text-gray-500">
-                {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}
+              <div class="flex space-x-2">
+                <button 
+                  @click="startEdit(activity)"
+                  class="text-purple-600 hover:text-purple-800"
+                  title="Edit"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button 
+                  @click="deleteActivity(activity)"
+                  class="text-red-500 hover:text-red-700"
+                  title="Delete"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
-            </div>
-            <div class="flex space-x-2">
-              <button 
-                @click="startEdit(activity)"
-                class="text-purple-600 hover:text-purple-800"
-                title="Edit"
-              >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </button>
-              <button 
-                @click="deleteActivity(activity)"
-                class="text-red-500 hover:text-red-700"
-                title="Delete"
-              >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>
@@ -151,6 +172,7 @@ const people = ref([])
 const error = ref(null)
 const showAddForm = ref(false)
 const editingActivity = ref(null)
+const expandedDays = ref({})
 
 const daysOfWeek = [
   'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -185,6 +207,11 @@ const fetchActivities = async () => {
     const response = await fetch('/api/activities')
     if (!response.ok) throw new Error('Failed to fetch activities')
     activities.value = await response.json()
+    
+    // Initialize all days as collapsed
+    daysOfWeek.forEach(day => {
+      expandedDays.value[day] = false
+    })
   } catch (err) {
     error.value = `Error loading activities: ${err.message}`
     console.error('Error:', err)
@@ -253,6 +280,10 @@ const deleteActivity = async (activity) => {
     error.value = `Error deleting activity: ${err.message}`
     console.error('Error:', err)
   }
+}
+
+const toggleDay = (day) => {
+  expandedDays.value[day] = !expandedDays.value[day]
 }
 
 onMounted(() => {
