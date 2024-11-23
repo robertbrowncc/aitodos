@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePersonRequest;
 use App\Models\Person;
 use Illuminate\Http\Request;
 
@@ -13,18 +14,9 @@ class PersonController extends Controller
         return Person::latest()->get();
     }
 
-    public function store(Request $request)
+    public function store(StorePersonRequest $request)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:people,email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'address' => 'nullable|string',
-        ]);
-
-        return Person::create($validated);
+        return Person::create($request->validated());
     }
 
     public function show(Person $person)
