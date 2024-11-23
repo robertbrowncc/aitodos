@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\Api\PersonController;
+use App\Http\Controllers\Api\ActivityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,6 @@ use App\Http\Controllers\Api\PersonController;
 |
 */
 
-Route::get('/todos/people', [TodoController::class, 'getPeople']);
 Route::apiResource('todos', TodoController::class);
 Route::apiResource('people', PersonController::class);
+Route::apiResource('activities', ActivityController::class);

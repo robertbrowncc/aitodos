@@ -7,7 +7,7 @@
         <title>@yield('title', 'Todo App 🐱')</title>
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        @vite(['resources/css/app.css', 'resources/css/background.css', 'resources/css/custom.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-full">
         @yield('header')

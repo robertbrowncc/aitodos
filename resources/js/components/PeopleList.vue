@@ -211,11 +211,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const people = ref([])
 const error = ref(null)
+const showAddForm = ref(false)
 const editingPerson = ref(null)
+
 const newPerson = ref({
   first_name: '',
   last_name: '',
@@ -224,7 +226,6 @@ const newPerson = ref({
   date_of_birth: '',
   address: ''
 })
-const showAddForm = ref(false)
 
 const sortedPeople = computed(() => 
   [...people.value].sort((a, b) => {
@@ -234,48 +235,35 @@ const sortedPeople = computed(() =>
   })
 )
 
-const getCsrfToken = () => {
-  const token = document.querySelector('meta[name="csrf-token"]')
-  return token ? token.getAttribute('content') : null
-}
-
 const fetchPeople = async () => {
   error.value = null
   try {
     const response = await fetch('/api/people')
-    if (!response.ok) {
-      const errorData = await response.text()
-      throw new Error(errorData || 'Failed to fetch people')
-    }
+    if (!response.ok) throw new Error('Failed to fetch people')
     people.value = await response.json()
   } catch (err) {
     error.value = `Error loading people: ${err.message}`
-    console.error('Error fetching people:', err)
+    console.error('Error:', err)
   }
 }
 
 const addPerson = async () => {
-  if (!newPerson.value.first_name.trim() || !newPerson.value.last_name.trim()) return
-
   error.value = null
   try {
     const response = await fetch('/api/people', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       },
       body: JSON.stringify(newPerson.value)
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to add person')
-    }
+    if (!response.ok) throw new Error('Failed to create person')
     
     const person = await response.json()
-    people.value.unshift(person)
+    people.value.push(person)
+    
     // Reset form
     newPerson.value = {
       first_name: '',
@@ -285,9 +273,10 @@ const addPerson = async () => {
       date_of_birth: '',
       address: ''
     }
+    showAddForm.value = false
   } catch (err) {
-    error.value = `Error adding person: ${err.message}`
-    console.error('Error adding person:', err)
+    error.value = `Error creating person: ${err.message}`
+    console.error('Error:', err)
   }
 }
 
@@ -300,28 +289,28 @@ const cancelEdit = () => {
 }
 
 const updatePerson = async () => {
+  if (!editingPerson.value) return
+  
+  error.value = null
   try {
     const response = await fetch(`/api/people/${editingPerson.value.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       },
       body: JSON.stringify(editingPerson.value)
     })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || 'Failed to update person')
-    }
-
+    if (!response.ok) throw new Error('Failed to update person')
+    
     const updatedPerson = await response.json()
     const index = people.value.findIndex(p => p.id === updatedPerson.id)
     people.value[index] = updatedPerson
     editingPerson.value = null
   } catch (err) {
     error.value = `Error updating person: ${err.message}`
-    console.error('Error updating person:', err)
+    console.error('Error:', err)
   }
 }
 
@@ -333,21 +322,16 @@ const deletePerson = async (person) => {
     const response = await fetch(`/api/people/${person.id}`, {
       method: 'DELETE',
       headers: {
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       }
     })
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      throw new Error(errorData || 'Failed to delete person')
-    }
-
-    const index = people.value.findIndex(p => p.id === person.id)
-    people.value.splice(index, 1)
+    if (!response.ok) throw new Error('Failed to delete person')
+    
+    people.value = people.value.filter(p => p.id !== person.id)
   } catch (err) {
     error.value = `Error deleting person: ${err.message}`
-    console.error('Error deleting person:', err)
+    console.error('Error:', err)
   }
 }
 
