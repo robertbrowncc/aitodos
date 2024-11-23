@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-2xl mx-auto">
     <div class="mb-6">
-      <form @submit.prevent="addTodo" class="space-y-4">
+      <form @submit.prevent="addTodo" class="space-y-4 bg-white p-6 rounded-lg shadow-md mb-8">
         <div>
           <label for="todoName" class="block text-sm font-medium text-blue-800">Task Name</label>
           <input 

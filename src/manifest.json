@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "AI Todos Extension",
+  "version": "1.0",
+  "description": "AI Todos Browser Extension",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "scripts": [
+      "browser-polyfill.js",
+      "styles.js",
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "browser-polyfill.js",
+        "styles.js",
+        "extension-loader.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    "*.css"
+  ]
+}
