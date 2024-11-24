@@ -60,6 +60,45 @@ class ListItemController extends Controller
         return response()->noContent();
     }
 
+    public function reorder(Request $request, CustomList $list)
+    {
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer|distinct|exists:list_items,id'
+        ]);
+
+        // Verify all items belong to this list
+        $itemCount = $list->items()
+            ->whereIn('id', $validated['order'])
+            ->count();
+
+        if ($itemCount !== count($validated['order'])) {
+            return response()->json([
+                'message' => 'All items must belong to the list'
+            ], 422);
+        }
+
+        try {
+            DB::transaction(function () use ($list, $validated) {
+                foreach ($validated['order'] as $index => $itemId) {
+                    $list->items()
+                        ->where('id', $itemId)
+                        ->update(['order' => $index]);
+                }
+            });
+
+            // Return the updated items
+            return $list->items()
+                ->orderBy('order')
+                ->get();
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update item order'
+            ], 500);
+        }
+    }
+
     protected function reorderItems(CustomList $list, ListItem $item, int $newOrder)
     {
         $oldOrder = $item->order;

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lists', function (Blueprint $table) {
+        Schema::create('custom_lists', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
@@ -18,7 +18,7 @@ return new class extends Migration
 
         Schema::create('list_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('list_id')->constrained()->onDelete('cascade');
+            $table->foreignId('list_id')->constrained('custom_lists')->onDelete('cascade');
             $table->string('content');
             $table->integer('order')->default(0);
             $table->boolean('completed')->default(false);
@@ -29,6 +29,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('list_items');
-        Schema::dropIfExists('lists');
+        Schema::dropIfExists('custom_lists');
     }
 };

@@ -27,6 +27,7 @@ Route::apiResource('activities', ActivityController::class);
 // List routes
 Route::apiResource('lists', ListController::class);
 Route::apiResource('lists.items', ListItemController::class);
+Route::post('lists/{list}/reorder', [ListItemController::class, 'reorder']);
 
 // Konami code endpoint
 Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);

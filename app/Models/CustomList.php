@@ -11,7 +11,7 @@ class CustomList extends Model
 {
     use HasFactory;
 
-    protected $table = 'lists';
+    protected $table = 'custom_lists';
 
     protected $fillable = [
         'name',

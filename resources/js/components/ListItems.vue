@@ -112,7 +112,7 @@ export default {
     async toggleComplete(item) {
       const newCompletedState = !item.completed
       try {
-        await axios.patch(`/api/items/${item.id}`, {
+        await axios.patch(`/api/lists/${this.list.id}/items/${item.id}`, {
           completed: newCompletedState
         })
         item.completed = newCompletedState
@@ -122,7 +122,7 @@ export default {
     },
     async deleteItem(item) {
       try {
-        await axios.delete(`/api/items/${item.id}`)
+        await axios.delete(`/api/lists/${this.list.id}/items/${item.id}`)
         const index = this.items.indexOf(item)
         if (index > -1) {
           this.items.splice(index, 1)
@@ -131,10 +131,12 @@ export default {
         this.$emit('error', 'Failed to delete item')
       }
     },
-    startDrag(index) {
+    startDrag(event, index) {
       this.draggedItem = index
+      event.dataTransfer.effectAllowed = 'move'
     },
-    async onDrop(index) {
+    async onDrop(event, index) {
+      event.preventDefault()
       if (this.draggedItem === null) return
       if (this.draggedItem === index) return
 
@@ -144,11 +146,20 @@ export default {
       
       // Update order on server
       try {
-        const itemIds = this.items.map(item => item.id)
+        // Update all items with their new order
+        const updatedOrder = this.items.map((item, index) => ({
+          id: item.id,
+          order: index
+        }))
+        
         await axios.post(`/api/lists/${this.list.id}/reorder`, {
-          order: itemIds
+          order: updatedOrder.map(item => item.id)
         })
+        
+        // Refresh items to ensure we have the correct order
+        await this.fetchItems()
       } catch (error) {
+        console.error('Failed to update item order:', error)
         this.$emit('error', 'Failed to update item order')
         await this.fetchItems() // Refresh items to restore correct order
       }

@@ -51,24 +51,11 @@ class DatabaseController extends Controller
             }
             
             Log::info('Database reset completed successfully');
+            return response()->json(['message' => 'Database reset successfully']);
             
-            return response()->json([
-                'message' => 'Database has been reset and reseeded successfully!',
-                'status' => 'success'
-            ]);
         } catch (\Exception $e) {
-            Log::error('Database reset failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            // Make sure to re-enable foreign keys even if there's an error
-            DB::statement('PRAGMA foreign_keys = ON');
-            
-            return response()->json([
-                'message' => 'Failed to reset database: ' . $e->getMessage(),
-                'error' => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            Log::error('Error resetting database: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to reset database'], 500);
         }
     }
 }
