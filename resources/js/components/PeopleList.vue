@@ -222,6 +222,7 @@ const fetchPeople = async () => {
 
 const addPerson = async () => {
   if (!newPerson.value.name.trim()) return
+  error.value = null // Clear any previous errors
   
   try {
     const response = await axios.post('/api/people', {
@@ -241,7 +242,13 @@ const addPerson = async () => {
     }
     showAddForm.value = false
   } catch (err) {
-    error.value = 'Failed to add person'
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else if (err.response?.data?.errors) {
+      error.value = Object.values(err.response.data.errors).flat().join('\n')
+    } else {
+      error.value = 'Failed to add person'
+    }
   }
 }
 

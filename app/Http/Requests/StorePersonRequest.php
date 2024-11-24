@@ -28,7 +28,7 @@ class StorePersonRequest extends FormRequest
         
         // Add required rules for store
         $rules['name'] = 'required|' . $rules['name'];
-        $rules['email'] = str_replace('nullable', '', $rules['email']) . '|' . $this->getUniqueEmailRule();
+        $rules['email'] = $rules['email'] . '|' . $this->getUniqueEmailRule();
 
         return $rules;
     }
