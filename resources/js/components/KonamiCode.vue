@@ -131,7 +131,7 @@ const resetDatabase = async () => {
   message.value = 'Resetting database...';
   
   try {
-    const response = await axios.post('/reset-database');
+    const response = await axios.post('/api/reset-database');
     emit('easter-egg-success');
     message.value = 'Database reset successful! Reloading...';
     
@@ -142,6 +142,7 @@ const resetDatabase = async () => {
       window.location.reload();
     }, 1500);
   } catch (error) {
+    console.error('Failed to reset database:', error);
     emit('error', 'Failed to reset database: ' + error.message);
     message.value = 'Failed to reset database. Please try again.';
     throw error; // Re-throw to be handled by triggerEasterEgg
