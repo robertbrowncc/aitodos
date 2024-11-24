@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Todo;
+use App\Models\Person;
+use App\Models\Activity;
+use App\Models\ListItem;
+use App\Models\CustomList;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
+use Database\Seeders\TodoSeeder;
+use Database\Seeders\ListSeeder;
+use Database\Seeders\PersonSeeder;
+use Database\Seeders\ActivitySeeder;
 
 class DatabaseController extends Controller
 {
@@ -15,44 +22,32 @@ class DatabaseController extends Controller
         try {
             Log::info('Starting database reset process');
             
-            // For SQLite, we need to close the connection first
-            DB::disconnect();
+            // Clear all tables
+            ListItem::truncate();
+            CustomList::truncate();
+            Todo::truncate();
+            Activity::truncate();
+            Person::truncate();
             
-            // Get the database path
-            $databasePath = database_path('database.sqlite');
-            Log::info('Database path: ' . $databasePath);
+            Log::info('All tables cleared');
             
-            // Delete the existing database file
-            if (File::exists($databasePath)) {
-                File::delete($databasePath);
+            // Run seeders
+            $seeders = [
+                PersonSeeder::class,
+                TodoSeeder::class,
+                ActivitySeeder::class,
+                ListSeeder::class,
+            ];
+            
+            foreach ($seeders as $seeder) {
+                $instance = new $seeder;
+                $instance->run();
             }
             
-            // Create a new empty database file
-            File::put($databasePath, '');
-            chmod($databasePath, 0666);
-            Log::info('Created new database file');
-            
-            // Clear config and cache
-            Artisan::call('config:clear');
-            Artisan::call('cache:clear');
-            Log::info('Config and cache cleared');
-            
-            // Run the migrations with seed
-            $migrateOutput = Artisan::call('migrate', [
-                '--seed' => true,
-                '--force' => true
-            ]);
-            
-            $output = Artisan::output();
-            Log::info('Migration output: ' . $output);
-            
-            if ($migrateOutput !== 0) {
-                throw new \Exception('Migration failed with output: ' . $output);
-            }
+            Log::info('Database reset completed successfully');
             
             return response()->json([
                 'message' => 'Database has been reset and reseeded successfully!',
-                'migrate_output' => $output,
                 'status' => 'success'
             ]);
         } catch (\Exception $e) {
@@ -62,9 +57,8 @@ class DatabaseController extends Controller
             ]);
             
             return response()->json([
-                'message' => 'Failed to reset database',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'message' => 'Failed to reset database: ' . $e->getMessage(),
+                'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

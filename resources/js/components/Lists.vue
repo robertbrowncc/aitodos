@@ -125,21 +125,23 @@ export default {
         const response = await axios.get('/api/lists')
         this.lists = response.data
       } catch (error) {
-        console.error('Error loading lists:', error)
+        this.$emit('error', 'Failed to load lists')
       }
     },
     async createList() {
+      if (!this.newListName.trim()) return
+      
       try {
-        await axios.post('/api/lists', {
-          name: this.newListName,
+        const response = await axios.post('/api/lists', {
+          name: this.newListName.trim(),
           description: this.newListDescription
         })
+        this.lists.push(response.data)
         this.newListName = ''
         this.newListDescription = ''
         this.showNewListForm = false
-        await this.fetchLists()
       } catch (error) {
-        console.error('Error creating list:', error)
+        this.$emit('error', 'Failed to create list')
       }
     },
     async deleteList(list) {
@@ -148,10 +150,13 @@ export default {
       }
       try {
         await axios.delete(`/api/lists/${list.id}`)
+        const index = this.lists.indexOf(list)
+        if (index > -1) {
+          this.lists.splice(index, 1)
+        }
         this.expandedLists.delete(list.id)
-        await this.fetchLists()
       } catch (error) {
-        console.error('Error deleting list:', error)
+        this.$emit('error', 'Failed to delete list')
       }
     },
     toggleList(listId) {

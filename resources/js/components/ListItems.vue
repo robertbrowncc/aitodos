@@ -90,101 +90,70 @@ export default {
   methods: {
     async fetchItems() {
       try {
-        console.log('Fetching items for list:', this.list.id);
         const response = await axios.get(`/api/lists/${this.list.id}/items`)
-        console.log('Fetched items:', response.data);
         this.items = response.data
       } catch (error) {
-        console.error('Error fetching items:', error)
+        this.$emit('error', 'Failed to load list items')
       }
     },
     async addItem() {
-      if (!this.newItemContent.trim()) return;
+      if (!this.newItemContent.trim()) return
       
       try {
-        console.log('Adding item to list:', this.list.id, 'Content:', this.newItemContent);
         const response = await axios.post(`/api/lists/${this.list.id}/items`, {
-          content: this.newItemContent.trim(),
-          completed: false
-        });
-        console.log('Response:', response.data);
-        this.items.push(response.data);
-        this.newItemContent = '';
+          content: this.newItemContent
+        })
+        this.items.push(response.data)
+        this.newItemContent = ''
       } catch (error) {
-        console.error('Error adding item:', error.response?.data || error.message);
+        this.$emit('error', 'Failed to add item')
       }
     },
     async toggleComplete(item) {
-      const newCompletedState = !item.completed;
-      
+      const newCompletedState = !item.completed
       try {
-        console.log('Toggling item completion:', item.id, newCompletedState);
-        await axios.patch(`/api/lists/${this.list.id}/items/${item.id}`, {
+        await axios.patch(`/api/items/${item.id}`, {
           completed: newCompletedState
-        });
-        item.completed = newCompletedState;
+        })
+        item.completed = newCompletedState
       } catch (error) {
-        console.error('Error toggling item completion:', error);
-        // Revert the UI state if the API call fails
-        item.completed = !newCompletedState;
+        this.$emit('error', 'Failed to update item')
       }
     },
     async deleteItem(item) {
       try {
-        console.log('Deleting item:', item.id);
-        await axios.delete(`/api/lists/${this.list.id}/items/${item.id}`);
-        const index = this.items.findIndex(i => i.id === item.id);
-        if (index !== -1) {
-          this.items.splice(index, 1);
+        await axios.delete(`/api/items/${item.id}`)
+        const index = this.items.indexOf(item)
+        if (index > -1) {
+          this.items.splice(index, 1)
         }
       } catch (error) {
-        console.error('Error deleting item:', error);
-        await this.fetchItems();
+        this.$emit('error', 'Failed to delete item')
       }
     },
-    startDrag(event, index) {
-      console.log('Started dragging item at index:', index);
-      this.draggedItem = index;
-      event.dataTransfer.effectAllowed = 'move';
-      // Add some visual feedback
-      event.target.classList.add('dragging');
+    startDrag(index) {
+      this.draggedItem = index
     },
-    async onDrop(event, index) {
-      event.preventDefault();
-      event.target.classList.remove('dragging');
-      
-      // Don't do anything if dropping onto the same item
-      if (this.draggedItem === index) {
-        console.log('Dropped on same position, ignoring');
-        return;
-      }
+    async onDrop(index) {
+      if (this.draggedItem === null) return
+      if (this.draggedItem === index) return
 
+      // Update local state
+      const itemToMove = this.items.splice(this.draggedItem, 1)[0]
+      this.items.splice(index, 0, itemToMove)
+      
+      // Update order on server
       try {
-        console.log('Moving item from index', this.draggedItem, 'to', index);
-        
-        // Get the dragged item
-        const itemToMove = this.items[this.draggedItem];
-        
-        // Remove the item from its original position
-        this.items.splice(this.draggedItem, 1);
-        
-        // Add it at the new position
-        this.items.splice(index, 0, itemToMove);
-
-        // Update the order on the server
-        console.log('Updating order on server');
-        await axios.patch(`/api/lists/${this.list.id}/items/${itemToMove.id}`, {
-          order: index
-        });
-        
-        // Refresh the list to ensure order is correct
-        await this.fetchItems();
+        const itemIds = this.items.map(item => item.id)
+        await axios.post(`/api/lists/${this.list.id}/reorder`, {
+          order: itemIds
+        })
       } catch (error) {
-        console.error('Error updating item order:', error);
-        await this.fetchItems(); // Refresh the list if there was an error
+        this.$emit('error', 'Failed to update item order')
+        await this.fetchItems() // Refresh items to restore correct order
       }
       
-      this.draggedItem = null;
+      this.draggedItem = null
     }
   }
 }

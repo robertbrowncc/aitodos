@@ -3,11 +3,13 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import axios from 'axios';
 
 const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let currentIndex = 0;
+const message = ref('');
+const isResetting = ref(false);
 
 const handleKeydown = (event) => {
   // Check if the pressed key matches the next key in the sequence
@@ -28,7 +30,28 @@ const handleKeydown = (event) => {
   }
 };
 
+const showMessage = (messageText, isError = false) => {
+  const messageDiv = document.createElement('div');
+  messageDiv.textContent = messageText;
+  messageDiv.style.position = 'fixed';
+  messageDiv.style.top = '20px';
+  messageDiv.style.left = '50%';
+  messageDiv.style.transform = 'translateX(-50%)';
+  messageDiv.style.backgroundColor = isError ? '#f44336' : '#4CAF50';
+  messageDiv.style.color = 'white';
+  messageDiv.style.padding = '10px 20px';
+  messageDiv.style.borderRadius = '5px';
+  messageDiv.style.zIndex = '9999';
+  messageDiv.style.textAlign = 'center';
+  messageDiv.style.minWidth = '300px';
+  messageDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+  document.body.appendChild(messageDiv);
+  
+  return messageDiv;
+};
+
 const triggerEasterEgg = async () => {
+  let messageDiv = null;
   try {
     // Create a fun animation effect
     document.body.style.transition = 'all 1s';
@@ -55,52 +78,44 @@ const triggerEasterEgg = async () => {
       document.body.style.transform = 'none';
     }, 1000);
 
-    // Call the database reset endpoint
-    const response = await axios.post('/api/reset-database');
-    console.log('Database reset response:', response.data);
-    
-    if (response.data.status === 'success') {
-      // Show a success message
-      const message = document.createElement('div');
-      message.textContent = '🎮 Database Reset Complete! 🎮';
-      message.style.position = 'fixed';
-      message.style.top = '20px';
-      message.style.left = '50%';
-      message.style.transform = 'translateX(-50%)';
-      message.style.backgroundColor = '#4CAF50';
-      message.style.color = 'white';
-      message.style.padding = '10px 20px';
-      message.style.borderRadius = '5px';
-      message.style.zIndex = '9999';
-      document.body.appendChild(message);
-      
-      setTimeout(() => {
-        document.body.removeChild(message);
-        // Force reload from server, not cache
-        window.location.href = window.location.href + '?t=' + new Date().getTime();
-      }, 3000);
-    } else {
-      throw new Error(response.data.migrate_output || 'Database reset failed');
-    }
+    // Show loading message
+    messageDiv = showMessage('🎮 Resetting Database... 🎮');
+
+    await resetDatabase();
   } catch (error) {
-    console.error('Failed to reset database:', error);
+    // Show error message
+    if (messageDiv) {
+      messageDiv.textContent = '❌ Database Reset Failed! Check console for details ❌';
+      messageDiv.style.backgroundColor = '#f44336';
+    } else {
+      messageDiv = showMessage('❌ Database Reset Failed! Check console for details ❌', true);
+    }
     
-    // Show an error message
-    const message = document.createElement('div');
-    message.textContent = '❌ Database Reset Failed! ❌';
-    message.style.position = 'fixed';
-    message.style.top = '20px';
-    message.style.left = '50%';
-    message.style.transform = 'translateX(-50%)';
-    message.style.backgroundColor = '#f44336';
-    message.style.color = 'white';
-    message.style.padding = '10px 20px';
-    message.style.borderRadius = '5px';
-    message.style.zIndex = '9999';
-    document.body.appendChild(message);
-    
+    // Remove error message after delay
     setTimeout(() => {
-      document.body.removeChild(message);
+      document.body.removeChild(messageDiv);
+    }, 5000);
+  }
+};
+
+const resetDatabase = async () => {
+  isResetting.value = true;
+  message.value = 'Resetting database...';
+  
+  try {
+    await axios.post('/api/reset-database');
+    this.$emit('easter-egg-success');
+    message.value = 'Database reset successful! Reloading...';
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (error) {
+    this.$emit('error', 'Failed to trigger easter egg: ' + error.message);
+    message.value = 'Failed to reset database. Please try again.';
+  } finally {
+    setTimeout(() => {
+      message.value = '';
+      isResetting.value = false;
     }, 3000);
   }
 };
@@ -118,11 +133,11 @@ onUnmounted(() => {
 <style scoped>
 @keyframes fall {
   0% {
-    transform: translateY(-100vh) scale(0);
+    transform: translateY(-100vh) rotate(0deg);
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) scale(1);
+    transform: translateY(100vh) rotate(360deg);
     opacity: 0;
   }
 }

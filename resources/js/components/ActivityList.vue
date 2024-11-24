@@ -172,6 +172,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
 
 const activities = ref([])
 const people = ref([])
@@ -208,49 +209,40 @@ const formatTime = (time) => {
 }
 
 const fetchActivities = async () => {
-  error.value = null
   try {
-    const response = await fetch('/api/activities')
-    if (!response.ok) throw new Error('Failed to fetch activities')
-    activities.value = await response.json()
+    const response = await axios.get('/api/activities')
+    activities.value = response.data
     
     // Initialize all days as collapsed
     daysOfWeek.forEach(day => {
       expandedDays.value[day] = false
     })
   } catch (err) {
-    error.value = `Error loading activities: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to load activities'
   }
 }
 
 const fetchPeople = async () => {
   try {
-    const response = await fetch('/api/people')
-    if (!response.ok) throw new Error('Failed to fetch people')
-    people.value = await response.json()
+    const response = await axios.get('/api/people')
+    people.value = response.data
   } catch (err) {
-    error.value = `Error loading people: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to load people'
   }
 }
 
 const addActivity = async () => {
-  error.value = null
+  if (!newActivity.value.name.trim()) return
+  
   try {
-    const response = await fetch('/api/activities', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify(newActivity.value)
+    const response = await axios.post('/api/activities', {
+      name: newActivity.value.name.trim(),
+      person_id: newActivity.value.person_id,
+      start_time: newActivity.value.start_time,
+      end_time: newActivity.value.end_time,
+      day_of_week: newActivity.value.day_of_week
     })
-
-    if (!response.ok) throw new Error('Failed to create activity')
-    
-    const activity = await response.json()
-    activities.value.push(activity)
+    activities.value.push(response.data)
     
     // Reset form
     newActivity.value = {
@@ -262,29 +254,18 @@ const addActivity = async () => {
     }
     showAddForm.value = false
   } catch (err) {
-    error.value = `Error creating activity: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to add activity'
   }
 }
 
 const deleteActivity = async (activity) => {
   if (!confirm('Are you sure you want to delete this activity?')) return
 
-  error.value = null
   try {
-    const response = await fetch(`/api/activities/${activity.id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
-    })
-
-    if (!response.ok) throw new Error('Failed to delete activity')
-    
+    await axios.delete(`/api/activities/${activity.id}`)
     activities.value = activities.value.filter(a => a.id !== activity.id)
   } catch (err) {
-    error.value = `Error deleting activity: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to delete activity'
   }
 }
 

@@ -189,11 +189,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
 const people = ref([])
 const error = ref(null)
 const showAddForm = ref(false)
 const editingPerson = ref(null)
+const originalName = ref(null)
 
 const newPerson = ref({
   name: '',
@@ -210,35 +212,26 @@ const sortedPeople = computed(() => {
 })
 
 const fetchPeople = async () => {
-  error.value = null
   try {
-    const response = await fetch('/api/people')
-    if (!response.ok) throw new Error('Failed to fetch people')
-    people.value = await response.json()
+    const response = await axios.get('/api/people')
+    people.value = response.data
   } catch (err) {
-    error.value = `Error loading people: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to load people'
   }
 }
 
 const addPerson = async () => {
-  error.value = null
+  if (!newPerson.value.name.trim()) return
+  
   try {
-    const response = await fetch('/api/people', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify(newPerson.value)
+    const response = await axios.post('/api/people', {
+      name: newPerson.value.name.trim(),
+      email: newPerson.value.email,
+      phone: newPerson.value.phone,
+      date_of_birth: newPerson.value.date_of_birth,
+      address: newPerson.value.address
     })
-
-    if (!response.ok) throw new Error('Failed to create person')
-    
-    const person = await response.json()
-    people.value.push(person)
-    
-    // Reset form
+    people.value.push(response.data)
     newPerson.value = {
       name: '',
       email: '',
@@ -248,13 +241,13 @@ const addPerson = async () => {
     }
     showAddForm.value = false
   } catch (err) {
-    error.value = `Error creating person: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to add person'
   }
 }
 
 const startEdit = (person) => {
   editingPerson.value = { ...person }
+  originalName.value = person.name
 }
 
 const cancelEdit = () => {
@@ -262,47 +255,36 @@ const cancelEdit = () => {
 }
 
 const updatePerson = async () => {
-  error.value = null
+  if (!editingPerson.value.name.trim()) {
+    editingPerson.value.name = originalName.value
+    return
+  }
+  
   try {
-    const response = await fetch(`/api/people/${editingPerson.value.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify(editingPerson.value)
+    await axios.put(`/api/people/${editingPerson.value.id}`, {
+      name: editingPerson.value.name.trim(),
+      email: editingPerson.value.email,
+      phone: editingPerson.value.phone,
+      date_of_birth: editingPerson.value.date_of_birth,
+      address: editingPerson.value.address
     })
-
-    if (!response.ok) throw new Error('Failed to update person')
-    
-    const updatedPerson = await response.json()
-    const index = people.value.findIndex(p => p.id === updatedPerson.id)
-    people.value[index] = updatedPerson
+    const index = people.value.findIndex(p => p.id === editingPerson.value.id)
+    people.value[index] = editingPerson.value
     editingPerson.value = null
   } catch (err) {
-    error.value = `Error updating person: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to update person'
+    editingPerson.value.name = originalName.value
   }
 }
 
 const deletePerson = async (person) => {
   if (!confirm(`Are you sure you want to delete ${person.name}?`)) return
   
-  error.value = null
   try {
-    const response = await fetch(`/api/people/${person.id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
-    })
-
-    if (!response.ok) throw new Error('Failed to delete person')
-    
+    await axios.delete(`/api/people/${person.id}`)
     people.value = people.value.filter(p => p.id !== person.id)
   } catch (err) {
-    error.value = `Error deleting person: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to delete person'
   }
 }
 

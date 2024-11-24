@@ -138,6 +138,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 const todos = ref([])
 const people = ref([])
@@ -150,63 +151,33 @@ const newTodo = ref({
 })
 
 const fetchTodos = async () => {
-  error.value = null
   try {
-    const response = await fetch('/api/todos')
-    if (!response.ok) throw new Error('Failed to fetch todos')
-    todos.value = await response.json()
+    const response = await axios.get('/api/todos')
+    todos.value = response.data
   } catch (err) {
-    error.value = `Error loading todos: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to load todos'
   }
 }
 
 const fetchPeople = async () => {
-  error.value = null
   try {
-    const response = await fetch('/api/people', {
+    const response = await axios.get('/api/people', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       }
     })
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.message || `Failed to fetch people: ${response.status} ${response.statusText}`)
-    }
-    
-    const data = await response.json()
-    if (!Array.isArray(data)) {
-      throw new Error('Invalid response format: expected an array of people')
-    }
-    
-    people.value = data
+    people.value = response.data
   } catch (err) {
-    error.value = `Error loading people: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to load people'
   }
 }
 
 const addTodo = async () => {
-  error.value = null
   try {
-    const response = await fetch('/api/todos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify(newTodo.value)
-    })
-
-    if (!response.ok) throw new Error('Failed to create todo')
-    
-    const todo = await response.json()
-    todos.value.push(todo)
-    
-    // Reset form
+    const response = await axios.post('/api/todos', newTodo.value)
+    todos.value.push(response.data)
     newTodo.value = {
       name: '',
       url: '',
@@ -214,95 +185,46 @@ const addTodo = async () => {
     }
     showAddForm.value = false
   } catch (err) {
-    error.value = `Error creating todo: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to add todo'
   }
 }
 
 const toggleTodo = async (todo) => {
-  error.value = null
   try {
     const requestBody = {
       completed: !todo.completed,
       person_id: todo.person_id || null
     };
-    console.log('Sending update request:', requestBody);
-    
-    const response = await fetch(`/api/todos/${todo.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify(requestBody)
-    })
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Server response:', errorData);
-      throw new Error('Failed to update todo');
-    }
-    
-    const updatedTodo = await response.json()
+    const response = await axios.put(`/api/todos/${todo.id}`, requestBody)
     const index = todos.value.findIndex(t => t.id === todo.id)
-    todos.value[index] = updatedTodo
+    todos.value[index] = response.data
   } catch (err) {
-    error.value = `Error updating todo: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to update todo'
   }
 }
 
 const updateAssignment = async (todo) => {
-  error.value = null
   try {
     const requestBody = {
       person_id: todo.person_id || null,
       completed: todo.completed
     };
-    console.log('Sending update request:', requestBody);
-    
-    const response = await fetch(`/api/todos/${todo.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify(requestBody)
-    })
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Server response:', errorData);
-      throw new Error('Failed to update assignment');
-    }
-    
-    const updatedTodo = await response.json()
+    const response = await axios.put(`/api/todos/${todo.id}`, requestBody)
     const index = todos.value.findIndex(t => t.id === todo.id)
-    todos.value[index] = updatedTodo
+    todos.value[index] = response.data
   } catch (err) {
-    error.value = `Error updating assignment: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to update assignment'
   }
 }
 
 const deleteTodo = async (todo) => {
   if (!confirm('Are you sure you want to delete this todo?')) return
 
-  error.value = null
   try {
-    const response = await fetch(`/api/todos/${todo.id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
-    })
-
-    if (!response.ok) throw new Error('Failed to delete todo')
-    
+    await axios.delete(`/api/todos/${todo.id}`)
     todos.value = todos.value.filter(t => t.id !== todo.id)
   } catch (err) {
-    error.value = `Error deleting todo: ${err.message}`
-    console.error('Error:', err)
+    error.value = 'Failed to delete todo'
   }
 }
 
