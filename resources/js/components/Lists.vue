@@ -1,10 +1,26 @@
 <template>
   <div class="lists-container">
-    <div class="lists-header">
-      <h2 class="text-xl font-bold mb-4">Lists</h2>
-      <button @click="showNewListForm = true" class="btn btn-primary">
-        New List
-      </button>
+    <div class="lists-header flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Lists</h2>
+      <div class="flex space-x-2">
+        <button 
+          @click="expandAllLists" 
+          class="btn btn-secondary"
+          :disabled="lists.length === 0"
+        >
+          Expand All
+        </button>
+        <button 
+          @click="collapseAllLists" 
+          class="btn btn-secondary"
+          :disabled="lists.length === 0"
+        >
+          Collapse All
+        </button>
+        <button @click="showNewListForm = true" class="btn btn-primary">
+          New List
+        </button>
+      </div>
     </div>
 
     <!-- New List Form -->
@@ -108,19 +124,15 @@ export default {
       try {
         const response = await axios.get('/api/lists')
         this.lists = response.data
-        // Expand all lists by default
-        this.lists.forEach(list => this.expandedLists.add(list.id))
       } catch (error) {
-        console.error('Error fetching lists:', error)
+        console.error('Error loading lists:', error)
       }
     },
     async createList() {
-      if (!this.newListName.trim()) return
-
       try {
         await axios.post('/api/lists', {
-          name: this.newListName.trim(),
-          description: this.newListDescription.trim()
+          name: this.newListName,
+          description: this.newListDescription
         })
         this.newListName = ''
         this.newListDescription = ''
@@ -131,27 +143,34 @@ export default {
       }
     },
     async deleteList(list) {
-      if (!confirm(`Are you sure you want to delete the list "${list.name}" and all its items?`)) {
-        return;
+      if (!confirm(`Are you sure you want to delete "${list.name}"?`)) {
+        return
       }
-      
       try {
-        await axios.delete(`/api/lists/${list.id}`);
-        this.expandedLists.delete(list.id); // Remove from expanded set
-        await this.fetchLists();
+        await axios.delete(`/api/lists/${list.id}`)
+        this.expandedLists.delete(list.id)
+        await this.fetchLists()
       } catch (error) {
-        console.error('Error deleting list:', error);
+        console.error('Error deleting list:', error)
       }
     },
     toggleList(listId) {
       if (this.expandedLists.has(listId)) {
-        this.expandedLists.delete(listId);
+        this.expandedLists.delete(listId)
       } else {
-        this.expandedLists.add(listId);
+        this.expandedLists.add(listId)
       }
     },
     isListExpanded(listId) {
-      return this.expandedLists.has(listId);
+      return this.expandedLists.has(listId)
+    },
+    expandAllLists() {
+      this.lists.forEach(list => {
+        this.expandedLists.add(list.id)
+      })
+    },
+    collapseAllLists() {
+      this.expandedLists.clear()
     }
   }
 }
@@ -159,13 +178,12 @@ export default {
 
 <style scoped>
 .lists-container {
+  max-width: 800px;
+  margin: 0 auto;
   padding: 1rem;
 }
 
 .lists-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1rem;
 }
 
@@ -176,12 +194,17 @@ export default {
   transition: all 0.2s;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background-color: #4f46e5;
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background-color: #4338ca;
 }
 
@@ -190,7 +213,7 @@ export default {
   color: #374151;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background-color: #d1d5db;
 }
 </style>
