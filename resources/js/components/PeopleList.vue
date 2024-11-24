@@ -26,27 +26,15 @@
         @submit.prevent="addPerson" 
         class="space-y-4 bg-white p-6 rounded-lg shadow-md mb-8"
       >
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="firstName" class="block text-sm font-medium text-blue-800">First Name</label>
-            <input 
-              type="text" 
-              id="firstName"
-              v-model="newPerson.first_name" 
-              class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              required
-            >
-          </div>
-          <div>
-            <label for="lastName" class="block text-sm font-medium text-blue-800">Last Name</label>
-            <input 
-              type="text" 
-              id="lastName"
-              v-model="newPerson.last_name" 
-              class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              required
-            >
-          </div>
+        <div>
+          <label for="name" class="block text-sm font-medium text-blue-800">Name</label>
+          <input 
+            type="text" 
+            id="name"
+            v-model="newPerson.name" 
+            class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            required
+          >
         </div>
         <div>
           <label for="email" class="block text-sm font-medium text-blue-800">Email</label>
@@ -102,25 +90,14 @@
         <div v-if="editingPerson && editingPerson.id === person.id">
           <!-- Edit Form -->
           <form @submit.prevent="updatePerson" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-blue-800">First Name</label>
-                <input 
-                  type="text" 
-                  v-model="editingPerson.first_name" 
-                  class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  required
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-blue-800">Last Name</label>
-                <input 
-                  type="text" 
-                  v-model="editingPerson.last_name" 
-                  class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  required
-                >
-              </div>
+            <div>
+              <label class="block text-sm font-medium text-blue-800">Name</label>
+              <input 
+                type="text" 
+                v-model="editingPerson.name" 
+                class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                required
+              >
             </div>
             <div>
               <label class="block text-sm font-medium text-blue-800">Email</label>
@@ -175,7 +152,7 @@
           <!-- View Mode -->
           <div class="flex justify-between items-start">
             <div>
-              <h3 class="text-lg font-semibold">{{ person.first_name }} {{ person.last_name }}</h3>
+              <h3 class="text-lg font-semibold">{{ person.name }}</h3>
               <div v-if="person.email" class="text-gray-600">{{ person.email }}</div>
               <div v-if="person.phone" class="text-gray-600">{{ person.phone }}</div>
               <div v-if="person.date_of_birth" class="text-gray-600">
@@ -219,21 +196,18 @@ const showAddForm = ref(false)
 const editingPerson = ref(null)
 
 const newPerson = ref({
-  first_name: '',
-  last_name: '',
+  name: '',
   email: '',
   phone: '',
   date_of_birth: '',
   address: ''
 })
 
-const sortedPeople = computed(() => 
-  [...people.value].sort((a, b) => {
-    const lastNameCompare = a.last_name.localeCompare(b.last_name);
-    if (lastNameCompare !== 0) return lastNameCompare;
-    return a.first_name.localeCompare(b.first_name);
-  })
-)
+const sortedPeople = computed(() => {
+  return [...people.value].sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+})
 
 const fetchPeople = async () => {
   error.value = null
@@ -266,8 +240,7 @@ const addPerson = async () => {
     
     // Reset form
     newPerson.value = {
-      first_name: '',
-      last_name: '',
+      name: '',
       email: '',
       phone: '',
       date_of_birth: '',
@@ -289,8 +262,6 @@ const cancelEdit = () => {
 }
 
 const updatePerson = async () => {
-  if (!editingPerson.value) return
-  
   error.value = null
   try {
     const response = await fetch(`/api/people/${editingPerson.value.id}`, {
@@ -315,8 +286,8 @@ const updatePerson = async () => {
 }
 
 const deletePerson = async (person) => {
-  if (!confirm('Are you sure you want to delete this person?')) return
-
+  if (!confirm(`Are you sure you want to delete ${person.name}?`)) return
+  
   error.value = null
   try {
     const response = await fetch(`/api/people/${person.id}`, {

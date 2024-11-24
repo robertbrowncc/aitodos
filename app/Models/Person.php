@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Todo;
 
 class Person extends Model
 {
@@ -15,30 +16,17 @@ class Person extends Model
      * @var array<string>
      */
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'date_of_birth',
-        'address',
+        'name',
+        'email'
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the person's todos.
      *
-     * @var array<string, string>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $casts = [
-        'date_of_birth' => 'date',
-    ];
-
-    /**
-     * Get the person's full name.
-     *
-     * @return string
-     */
-    public function getFullNameAttribute()
+    public function todos()
     {
-        return "{$this->first_name} {$this->last_name}";
+        return $this->hasMany(Todo::class);
     }
 }

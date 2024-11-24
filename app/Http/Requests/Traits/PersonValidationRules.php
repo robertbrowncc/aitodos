@@ -12,8 +12,7 @@ trait PersonValidationRules
     protected function getCommonRules(): array
     {
         return [
-            'first_name' => 'string|max:255',
-            'last_name' => 'string|max:255',
+            'name' => 'string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date',

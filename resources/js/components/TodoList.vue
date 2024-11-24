@@ -56,7 +56,7 @@
           >
             <option :value="null">Select a person</option>
             <option v-for="person in people" :key="person.id" :value="person.id">
-              {{ person.first_name }} {{ person.last_name }}
+              {{ person.name }}
             </option>
           </select>
         </div>
@@ -96,7 +96,7 @@
                 {{ todo.url }}
               </a>
               <div v-if="todo.person" class="text-sm text-gray-600">
-                Assigned to: {{ todo.person.first_name }} {{ todo.person.last_name }}
+                Assigned to: {{ todo.person.name }}
                 <select
                   v-model="todo.person_id"
                   @change="updateAssignment(todo)"
@@ -104,7 +104,7 @@
                 >
                   <option :value="null">Unassign</option>
                   <option v-for="person in people" :key="person.id" :value="person.id">
-                    {{ person.first_name }} {{ person.last_name }}
+                    {{ person.name }}
                   </option>
                 </select>
               </div>
@@ -116,7 +116,7 @@
                 >
                   <option :value="null">Assign to someone</option>
                   <option v-for="person in people" :key="person.id" :value="person.id">
-                    {{ person.first_name }} {{ person.last_name }}
+                    {{ person.name }}
                   </option>
                 </select>
               </div>

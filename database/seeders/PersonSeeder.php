@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Person;
 use Illuminate\Database\Seeder;
+use App\Models\Person;
 
 class PersonSeeder extends Seeder
 {
@@ -14,44 +14,36 @@ class PersonSeeder extends Seeder
     {
         $people = [
             [
-                'first_name' => 'John',
-                'last_name' => 'Doe',
-                'email' => 'john.doe@example.com',
-                'phone' => '555-0100',
-                'date_of_birth' => '1990-01-15',
-                'address' => '123 Main St, Anytown, USA'
+                'name' => 'Jeffrey "The Dude" Lebowski',
+                'email' => 'thedude@lebowski.com'
             ],
             [
-                'first_name' => 'Jane',
-                'last_name' => 'Smith',
-                'email' => 'jane.smith@example.com',
-                'phone' => '555-0101',
-                'date_of_birth' => '1992-03-20',
-                'address' => '456 Oak Ave, Somewhere, USA'
+                'name' => 'Walter Sobchak',
+                'email' => 'walter@sobchak-security.com'
             ],
             [
-                'first_name' => 'Bob',
-                'last_name' => 'Johnson',
-                'email' => 'bob.johnson@example.com',
-                'phone' => '555-0102',
-                'date_of_birth' => '1985-07-10',
-                'address' => '789 Pine Rd, Elsewhere, USA'
+                'name' => 'Donny Kerabatsos',
+                'email' => 'donny@bowling.com'
             ],
             [
-                'first_name' => 'Alice',
-                'last_name' => 'Williams',
-                'email' => 'alice.williams@example.com',
-                'phone' => '555-0103',
-                'date_of_birth' => '1988-11-30',
-                'address' => '321 Elm St, Nowhere, USA'
+                'name' => 'Maude Lebowski',
+                'email' => 'maude@knox-reilly.com'
             ],
             [
-                'first_name' => 'Charlie',
-                'last_name' => 'Brown',
-                'email' => 'charlie.brown@example.com',
-                'phone' => '555-0104',
-                'date_of_birth' => '1995-05-25',
-                'address' => '654 Maple Dr, Anywhere, USA'
+                'name' => 'Jesus Quintana',
+                'email' => 'jesus@bowling.com'
+            ],
+            [
+                'name' => 'Bunny Lebowski',
+                'email' => 'bunny@lebowski.com'
+            ],
+            [
+                'name' => 'Jackie Treehorn',
+                'email' => 'jackie@treehorn-productions.com'
+            ],
+            [
+                'name' => 'Brandt',
+                'email' => 'brandt@lebowski-estate.com'
             ]
         ];
 

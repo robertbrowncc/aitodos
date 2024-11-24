@@ -47,7 +47,7 @@
           >
             <option value="">Select a person</option>
             <option v-for="person in people" :key="person.id" :value="person.id">
-              {{ person.first_name }} {{ person.last_name }}
+              {{ person.name }}
             </option>
           </select>
         </div>
@@ -136,7 +136,7 @@
               <div>
                 <div class="font-medium">{{ activity.name }}</div>
                 <div class="text-sm text-gray-600">
-                  {{ activity.person.first_name }} {{ activity.person.last_name }}
+                  {{ activity.person.name }}
                 </div>
                 <div class="text-sm text-gray-500">
                   {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}

@@ -27,8 +27,7 @@ class UpdatePersonRequest extends FormRequest
         $rules = $this->getCommonRules();
         
         // Add sometimes|required rules for update
-        $rules['first_name'] = 'sometimes|required|' . $rules['first_name'];
-        $rules['last_name'] = 'sometimes|required|' . $rules['last_name'];
+        $rules['name'] = 'sometimes|required|' . $rules['name'];
         $rules['email'] = 'sometimes|' . $rules['email'] . '|' . $this->getUniqueEmailRule();
 
         return $rules;
