@@ -19,52 +19,52 @@ class TodoSeeder extends Seeder
             [
                 'name' => 'Review project proposal',
                 'url' => 'https://docs.example.com/proposal',
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Schedule team meeting',
                 'url' => null,
-                'done' => true
+                'completed' => true
             ],
             [
                 'name' => 'Update documentation',
                 'url' => 'https://wiki.example.com/docs',
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Fix critical bug in production',
                 'url' => 'https://github.com/example/repo/issues/123',
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Prepare quarterly report',
                 'url' => null,
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Review pull requests',
                 'url' => 'https://github.com/example/repo/pulls',
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Deploy new features',
                 'url' => 'https://deploy.example.com',
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Update dependencies',
                 'url' => 'https://npmjs.com',
-                'done' => true
+                'completed' => true
             ],
             [
                 'name' => 'Write unit tests',
                 'url' => null,
-                'done' => false
+                'completed' => false
             ],
             [
                 'name' => 'Conduct code review',
                 'url' => 'https://github.com/example/repo/reviews',
-                'done' => false
+                'completed' => false
             ]
         ];
 

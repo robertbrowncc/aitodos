@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\Api\PersonController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\DatabaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,6 @@ use App\Http\Controllers\Api\ActivityController;
 Route::apiResource('todos', TodoController::class);
 Route::apiResource('people', PersonController::class);
 Route::apiResource('activities', ActivityController::class);
+
+// Konami code endpoint
+Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);
