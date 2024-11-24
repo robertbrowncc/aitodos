@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Traits\PersonValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePersonRequest extends FormRequest
 {
+    use PersonValidationRules;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -21,13 +24,13 @@ class StorePersonRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:people,email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'address' => 'nullable|string',
-        ];
+        $rules = $this->getCommonRules();
+        
+        // Add required rules for store
+        $rules['first_name'] = 'required|' . $rules['first_name'];
+        $rules['last_name'] = 'required|' . $rules['last_name'];
+        $rules['email'] = str_replace('nullable', '', $rules['email']) . '|' . $this->getUniqueEmailRule();
+
+        return $rules;
     }
 }

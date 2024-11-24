@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Traits\PersonValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePersonRequest extends FormRequest
 {
+    use PersonValidationRules;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -21,13 +24,13 @@ class UpdatePersonRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
-            'email' => 'nullable|email|unique:people,email,' . $this->person->id . '|max:255',
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'address' => 'nullable|string',
-        ];
+        $rules = $this->getCommonRules();
+        
+        // Add sometimes|required rules for update
+        $rules['first_name'] = 'sometimes|required|' . $rules['first_name'];
+        $rules['last_name'] = 'sometimes|required|' . $rules['last_name'];
+        $rules['email'] = 'sometimes|' . $rules['email'] . '|' . $this->getUniqueEmailRule();
+
+        return $rules;
     }
 }
