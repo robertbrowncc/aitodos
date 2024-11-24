@@ -17,7 +17,24 @@ class Person extends Model
      */
     protected $fillable = [
         'name',
-        'email'
+        'email',
+        'phone',
+        'date_of_birth',
+        'address'
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'email',
+        'phone',
+        'date_of_birth',
+        'address',
+        'created_at',
+        'updated_at'
     ];
 
     /**

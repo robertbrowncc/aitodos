@@ -28,7 +28,7 @@
     >
       <div 
         v-for="(item, index) in items" 
-        :key="item.id"
+        :key="`item-${item.id}`"
         class="flex items-center space-x-2 p-2 bg-gray-50 rounded-md"
         draggable="true"
         @dragstart="startDrag($event, index)"
@@ -145,18 +145,9 @@ export default {
       
       // Update order on server
       try {
-        // Update all items with their new order
-        const updatedOrder = this.items.map((item, index) => ({
-          id: item.id,
-          order: index
-        }))
-        
         await axios.post(`/api/checklists/${this.checklist.id}/reorder`, {
-          order: updatedOrder.map(item => item.id)
+          order: this.items.map(item => item.id)
         })
-        
-        // Refresh items to ensure we have the correct order
-        await this.fetchItems()
       } catch (error) {
         console.error('Failed to update item order:', error)
         this.$emit('error', 'Failed to update item order')

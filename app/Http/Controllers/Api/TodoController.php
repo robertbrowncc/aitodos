@@ -11,7 +11,14 @@ class TodoController extends Controller
 {
     public function index()
     {
-        return Todo::with('person')->get();
+        return response()->json(
+            Todo::select('id', 'name', 'url', 'completed', 'person_id', 'created_at', 'updated_at')
+                ->with(['person' => function($query) {
+                    $query->select('id', 'name');
+                }])
+                ->latest()
+                ->get()
+        );
     }
 
     public function store(Request $request)
@@ -19,23 +26,28 @@ class TodoController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'url' => 'nullable|url|max:255',
-            'person_id' => 'nullable|exists:people,id'
+            'person_id' => 'nullable|exists:people,id',
+            'completed' => 'boolean'
         ]);
 
-        return Todo::create($validated);
+        // Set default value for completed if not provided
+        if (!isset($validated['completed'])) {
+            $validated['completed'] = false;
+        }
+
+        $todo = Todo::create($validated);
+        return $todo->load('person');
     }
 
     public function update(Request $request, Todo $todo)
     {
-        \Log::info('Todo update request:', $request->all());
-        
         $validated = $request->validate([
-            'completed' => 'required|boolean',
-            'person_id' => 'nullable|exists:people,id'
+            'completed' => 'boolean',
+            'person_id' => 'nullable|exists:people,id',
+            'name' => 'sometimes|required|string|max:255',
+            'url' => 'nullable|url|max:255'
         ]);
 
-        \Log::info('Validated data:', $validated);
-        
         $todo->update($validated);
         return $todo->load('person');
     }
@@ -43,7 +55,7 @@ class TodoController extends Controller
     public function destroy(Todo $todo)
     {
         $todo->delete();
-        return response()->json(['message' => 'Todo deleted']);
+        return response()->noContent();
     }
 
     public function getPeople()

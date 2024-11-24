@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\PersonController;
 use App\Http\Controllers\Api\ChecklistController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\DatabaseController;
 
 /*
@@ -19,9 +20,17 @@ use App\Http\Controllers\DatabaseController;
 |
 */
 
+Route::apiResource('todos', TodoController::class);
 Route::apiResource('people', PersonController::class);
 Route::apiResource('checklists', ChecklistController::class);
-Route::apiResource('checklist-items', ChecklistItemController::class);
+
+// Nested routes for checklist items
+Route::get('checklists/{checklist}/items', [ChecklistItemController::class, 'index']);
+Route::post('checklists/{checklist}/items', [ChecklistItemController::class, 'store']);
+Route::patch('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'update']);
+Route::delete('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'destroy']);
+Route::post('checklists/{checklist}/reorder', [ChecklistItemController::class, 'reorder']);
+
 Route::apiResource('activities', ActivityController::class);
 
 // Konami code endpoint

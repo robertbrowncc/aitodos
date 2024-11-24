@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Todo;
 use App\Models\Person;
 use App\Models\Activity;
-use App\Models\ListItem;
-use App\Models\CustomList;
+use App\Models\ChecklistItem;
+use App\Models\Checklist;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,8 +26,8 @@ class DatabaseController extends Controller
             DB::statement('PRAGMA foreign_keys = OFF');
             
             // Clear all tables in the correct order
-            DB::table('list_items')->truncate();
-            DB::table('custom_lists')->truncate();
+            DB::table('checklist_items')->truncate();
+            DB::table('checklists')->truncate();
             DB::table('todos')->truncate();
             DB::table('activities')->truncate();
             DB::table('people')->truncate();

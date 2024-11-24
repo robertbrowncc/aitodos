@@ -17,9 +17,16 @@ class Todo extends Model
         'person_id'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     protected $casts = [
         'completed' => 'boolean',
     ];
+
+    protected $with = ['person'];
 
     public function person()
     {

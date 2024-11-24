@@ -142,24 +142,100 @@ import axios from 'axios'
 
 const todos = ref([])
 const people = ref([])
-const error = ref(null)
+const error = ref('')
 const showAddForm = ref(false)
 const newTodo = ref({
   name: '',
   url: '',
-  person_id: null
+  person_id: null,
+  completed: false
 })
 
-const fetchTodos = async () => {
+async function fetchTodos() {
   try {
-    const response = await axios.get('/api/todos')
-    todos.value = response.data
+    console.log('Fetching todos from /api/todos...');
+    const response = await axios.get('/api/todos');
+    console.log('Todos response:', response.data);
+    if (!Array.isArray(response.data)) {
+      throw new Error('Expected array of todos');
+    }
+    todos.value = response.data;
+    error.value = '';
   } catch (err) {
-    error.value = 'Failed to load todos'
+    error.value = 'Failed to load todos: ' + (err.message || 'Unknown error');
+    console.error('Error fetching todos:', err);
+    todos.value = []; // Reset todos on error
   }
 }
 
-const fetchPeople = async () => {
+async function addTodo() {
+  try {
+    const response = await axios.post('/api/todos', newTodo.value)
+    todos.value.unshift(response.data)
+    newTodo.value = {
+      name: '',
+      url: '',
+      person_id: null,
+      completed: false
+    }
+    showAddForm.value = false
+    error.value = ''
+  } catch (err) {
+    error.value = 'Failed to add todo'
+    console.error('Error adding todo:', err)
+  }
+}
+
+async function toggleTodo(todo) {
+  try {
+    const response = await axios.patch(`/api/todos/${todo.id}`, {
+      completed: !todo.completed
+    })
+    Object.assign(todo, response.data)
+    error.value = ''
+  } catch (err) {
+    todo.completed = !todo.completed // Revert the change
+    error.value = 'Failed to update todo'
+    console.error('Error updating todo:', err)
+  }
+}
+
+async function updateAssignment(todo) {
+  try {
+    const response = await axios.patch(`/api/todos/${todo.id}`, {
+      person_id: todo.person_id
+    })
+    Object.assign(todo, response.data)
+    error.value = ''
+  } catch (err) {
+    error.value = 'Failed to update assignment'
+    console.error('Error updating assignment:', err)
+    await fetchTodos() // Refresh to get the correct state
+  }
+}
+
+async function deleteTodo(todo) {
+  if (!confirm('Are you sure you want to delete this todo?')) return
+  
+  try {
+    await axios.delete(`/api/todos/${todo.id}`)
+    const index = todos.value.indexOf(todo)
+    if (index > -1) {
+      todos.value.splice(index, 1)
+    }
+    error.value = ''
+  } catch (err) {
+    error.value = 'Failed to delete todo'
+    console.error('Error deleting todo:', err)
+  }
+}
+
+onMounted(() => {
+  fetchTodos()
+  fetchPeople()
+})
+
+async function fetchPeople() {
   try {
     const response = await axios.get('/api/people', {
       headers: {
@@ -173,63 +249,4 @@ const fetchPeople = async () => {
     error.value = 'Failed to load people'
   }
 }
-
-const addTodo = async () => {
-  try {
-    const response = await axios.post('/api/todos', newTodo.value)
-    todos.value.push(response.data)
-    newTodo.value = {
-      name: '',
-      url: '',
-      person_id: null
-    }
-    showAddForm.value = false
-  } catch (err) {
-    error.value = 'Failed to add todo'
-  }
-}
-
-const toggleTodo = async (todo) => {
-  try {
-    const requestBody = {
-      completed: !todo.completed,
-      person_id: todo.person_id || null
-    };
-    const response = await axios.put(`/api/todos/${todo.id}`, requestBody)
-    const index = todos.value.findIndex(t => t.id === todo.id)
-    todos.value[index] = response.data
-  } catch (err) {
-    error.value = 'Failed to update todo'
-  }
-}
-
-const updateAssignment = async (todo) => {
-  try {
-    const requestBody = {
-      person_id: todo.person_id || null,
-      completed: todo.completed
-    };
-    const response = await axios.put(`/api/todos/${todo.id}`, requestBody)
-    const index = todos.value.findIndex(t => t.id === todo.id)
-    todos.value[index] = response.data
-  } catch (err) {
-    error.value = 'Failed to update assignment'
-  }
-}
-
-const deleteTodo = async (todo) => {
-  if (!confirm('Are you sure you want to delete this todo?')) return
-
-  try {
-    await axios.delete(`/api/todos/${todo.id}`)
-    todos.value = todos.value.filter(t => t.id !== todo.id)
-  } catch (err) {
-    error.value = 'Failed to delete todo'
-  }
-}
-
-onMounted(() => {
-  fetchTodos()
-  fetchPeople()
-})
 </script>

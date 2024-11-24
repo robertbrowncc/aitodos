@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\CustomList;
-use App\Models\ListItem;
+use App\Models\Checklist;
+use App\Models\ChecklistItem;
 use App\Models\Person;
 use Illuminate\Database\Seeder;
 
@@ -16,7 +16,7 @@ class ListSeeder extends Seeder
         
         if ($dude) {
             // Bowling team list
-            $bowlingList = CustomList::create([
+            $bowlingList = Checklist::create([
                 'name' => 'Bowling Team Roster',
                 'description' => 'League players and substitutes',
                 'person_id' => $dude->id,
@@ -30,8 +30,8 @@ class ListSeeder extends Seeder
             ];
 
             foreach ($bowlingItems as $item) {
-                ListItem::create([
-                    'list_id' => $bowlingList->id,
+                ChecklistItem::create([
+                    'checklist_id' => $bowlingList->id,
                     'content' => $item['content'],
                     'order' => $item['order'],
                     'completed' => false,
@@ -39,7 +39,7 @@ class ListSeeder extends Seeder
             }
 
             // Rug shopping list
-            $rugList = CustomList::create([
+            $rugList = Checklist::create([
                 'name' => 'Rug Shopping List',
                 'description' => 'It really tied the room together',
                 'person_id' => $dude->id,
@@ -53,8 +53,8 @@ class ListSeeder extends Seeder
             ];
 
             foreach ($rugItems as $item) {
-                ListItem::create([
-                    'list_id' => $rugList->id,
+                ChecklistItem::create([
+                    'checklist_id' => $rugList->id,
                     'content' => $item['content'],
                     'order' => $item['order'],
                     'completed' => false,
@@ -63,12 +63,12 @@ class ListSeeder extends Seeder
         }
 
         // Create some random lists for testing
-        CustomList::factory()
+        Checklist::factory()
             ->count(3)
-            ->afterCreating(function (CustomList $list) {
-                ListItem::factory()
+            ->afterCreating(function (Checklist $list) {
+                ChecklistItem::factory()
                     ->count(5)
-                    ->create(['list_id' => $list->id]);
+                    ->create(['checklist_id' => $list->id]);
             })
             ->create();
     }
