@@ -18,10 +18,7 @@ class Activity extends Model
         'day_of_week'
     ];
 
-    protected $casts = [
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
-    ];
+    protected $casts = [];
 
     public function person()
     {

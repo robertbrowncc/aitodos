@@ -34,15 +34,15 @@ class ActivityController extends Controller
     public function update(Request $request, Activity $activity)
     {
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'person_id' => 'sometimes|required|exists:people,id',
-            'start_time' => 'sometimes|required|date_format:H:i',
-            'end_time' => 'sometimes|required|date_format:H:i|after:start_time',
-            'day_of_week' => 'sometimes|required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'name' => 'required|string|max:255',
+            'person_id' => 'required|exists:people,id',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'day_of_week' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
         ]);
 
         $activity->update($validated);
-        return $activity->load('person');
+        return $activity->fresh()->load('person');
     }
 
     public function destroy(Activity $activity)

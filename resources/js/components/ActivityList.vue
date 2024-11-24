@@ -1,169 +1,241 @@
 <template>
-  <div class="max-w-3xl mx-auto">
-    <div v-if="error" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-      {{ error }}
-    </div>
-
-    <div class="mb-6">
-      <button 
-        @click="showAddForm = !showAddForm"
-        class="w-full flex justify-between items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors mb-2"
-      >
-        <span class="text-lg font-medium text-purple-800">Add New Activity</span>
-        <svg 
-          class="w-6 h-6 text-purple-800 transform transition-transform"
-          :class="{ 'rotate-180': showAddForm }"
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      <form 
-        v-show="showAddForm"
-        @submit.prevent="addActivity" 
-        class="space-y-4 bg-white p-6 rounded-lg shadow-md"
-      >
-        <div>
-          <label for="activityName" class="block text-sm font-medium text-purple-800">Activity Name</label>
-          <input 
-            type="text" 
-            id="activityName"
-            v-model="newActivity.name" 
-            class="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
-            required
-          >
-        </div>
-
-        <div>
-          <label for="personId" class="block text-sm font-medium text-purple-800">Assign To</label>
-          <select
-            id="personId"
-            v-model="newActivity.person_id"
-            class="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
-            required
-          >
-            <option value="">Select a person</option>
-            <option v-for="person in people" :key="person.id" :value="person.id">
-              {{ person.name }}
-            </option>
-          </select>
-        </div>
-
-        <div>
-          <label for="dayOfWeek" class="block text-sm font-medium text-purple-800">Day of Week</label>
-          <select
-            id="dayOfWeek"
-            v-model="newActivity.day_of_week"
-            class="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
-            required
-          >
-            <option value="">Select a day</option>
-            <option v-for="day in daysOfWeek" :key="day" :value="day">{{ day }}</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="startTime" class="block text-sm font-medium text-purple-800">Start Time</label>
-            <input 
-              type="time" 
-              id="startTime"
-              v-model="newActivity.start_time" 
-              class="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
-              required
-            >
-          </div>
-          <div>
-            <label for="endTime" class="block text-sm font-medium text-purple-800">End Time</label>
-            <input 
-              type="time" 
-              id="endTime"
-              v-model="newActivity.end_time" 
-              class="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
-              required
-            >
-          </div>
-        </div>
-
-        <button 
-          type="submit" 
-          class="w-full inline-flex justify-center rounded-lg border border-transparent bg-purple-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+  <div class="container mx-auto px-4 py-8">
+    <div class="mb-6 flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-gray-900">Activities</h1>
+      <div class="space-x-4">
+        <button @click="expandAll" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
+          Expand All (E)
+        </button>
+        <button @click="collapseAll" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
+          Collapse All (C)
+        </button>
+        <button
+          @click="showAddForm = true"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           Add Activity
         </button>
-      </form>
-    </div>
-
-    <div v-if="activities.length === 0" class="text-center text-gray-500 my-8">
-      No activities yet. Add one above!
-    </div>
-
-    <div v-else class="space-y-4">
-      <div class="text-sm text-gray-600 mb-2 bg-blue-50 p-3 rounded-lg flex items-center">
-        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Keyboard shortcuts: Press <kbd class="px-2 py-1 bg-white rounded border shadow-sm mx-1">E</kbd> to expand all days, <kbd class="px-2 py-1 bg-white rounded border shadow-sm mx-1">C</kbd> to collapse all
       </div>
-      <div v-for="(activitiesByDay, day) in groupedActivities" :key="day" class="bg-white rounded-lg shadow">
-        <button 
-          @click="toggleDay(day)"
-          class="w-full flex justify-between items-center p-4 text-left hover:bg-purple-50 transition-colors rounded-lg"
-          :class="{ 'rounded-b-none': expandedDays[day] }"
-        >
+    </div>
+
+    <div v-if="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+      {{ error }}
+    </div>
+
+    <!-- Add Activity Modal -->
+    <div v-if="showAddForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Add New Activity</h2>
+        <form @submit.prevent="addActivity" class="space-y-4">
           <div>
-            <h3 class="text-lg font-semibold text-purple-800">{{ day }}</h3>
-            <span class="text-sm text-gray-600">{{ activitiesByDay.length }} activities</span>
+            <label class="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              v-model="newActivity.name"
+              type="text"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
           </div>
-          <svg 
-            class="w-6 h-6 text-purple-800 transform transition-transform"
-            :class="{ 'rotate-180': expandedDays[day] }"
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Person</label>
+            <select
+              v-model="newActivity.person_id"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Select a person</option>
+              <option v-for="person in people" :key="person.id" :value="person.id">
+                {{ person.name }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Day of Week</label>
+            <select
+              v-model="newActivity.day_of_week"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Select a day</option>
+              <option v-for="day in daysOfWeek" :key="day" :value="day">
+                {{ day }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Start Time</label>
+            <input
+              v-model="newActivity.start_time"
+              type="time"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">End Time</label>
+            <input
+              v-model="newActivity.end_time"
+              type="time"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div class="flex justify-end space-x-4">
+            <button
+              type="button"
+              @click="showAddForm = false"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Activity Modal -->
+    <div v-if="editingActivity" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Edit Activity</h2>
+        <form @submit.prevent="updateActivity" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              v-model="editingActivity.name"
+              type="text"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Person</label>
+            <select
+              v-model="editingActivity.person_id"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Select a person</option>
+              <option v-for="person in people" :key="person.id" :value="person.id">
+                {{ person.name }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Day of Week</label>
+            <select
+              v-model="editingActivity.day_of_week"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Select a day</option>
+              <option v-for="day in daysOfWeek" :key="day" :value="day">
+                {{ day }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Start Time</label>
+            <input
+              v-model="editingActivity.start_time"
+              type="time"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">End Time</label>
+            <input
+              v-model="editingActivity.end_time"
+              type="time"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div class="flex justify-end space-x-4">
+            <button
+              type="button"
+              @click="cancelEdit"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Activities List -->
+    <div class="space-y-6">
+      <div v-for="day in daysOfWeek" :key="day" class="border rounded-lg overflow-hidden">
+        <div
+          @click="toggleDay(day)"
+          class="bg-gray-100 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-200"
+        >
+          <h2 class="text-xl font-semibold">{{ day }}</h2>
+          <span class="text-gray-500">
+            {{ groupedActivities[day]?.length || 0 }} activities
+          </span>
+        </div>
         
-        <div v-show="expandedDays[day]" class="p-4 border-t border-gray-200">
-          <div class="space-y-4">
-            <div v-for="activity in activitiesByDay" :key="activity.id" 
-                 class="flex justify-between items-start p-4 border border-gray-200 rounded-lg hover:bg-purple-50">
+        <div v-if="expandedDays[day] && groupedActivities[day]" class="divide-y">
+          <div
+            v-for="activity in groupedActivities[day]"
+            :key="activity.id"
+            class="px-4 py-3 hover:bg-gray-50"
+          >
+            <div class="flex justify-between items-center">
               <div>
-                <div class="font-medium">{{ activity.name }}</div>
-                <div class="text-sm text-gray-600">
-                  {{ activity.person.name }}
-                </div>
-                <div class="text-sm text-gray-500">
+                <h3 class="font-medium">{{ activity.name }}</h3>
+                <p class="text-sm text-gray-600">
+                  {{ activity.person?.name || 'No person assigned' }} |
                   {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}
-                </div>
+                </p>
               </div>
-              <div class="flex space-x-2">
-                <button 
+              <div class="space-x-2">
+                <button
                   @click="startEdit(activity)"
-                  class="text-purple-600 hover:text-purple-800"
-                  title="Edit"
+                  class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                 >
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
+                  Edit
                 </button>
-                <button 
+                <button
                   @click="deleteActivity(activity)"
-                  class="text-red-500 hover:text-red-700"
-                  title="Delete"
+                  class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
                 >
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  Delete
                 </button>
               </div>
             </div>
           </div>
+        </div>
+        
+        <div
+          v-else-if="expandedDays[day] && (!groupedActivities[day] || groupedActivities[day].length === 0)"
+          class="px-4 py-3 text-gray-500"
+        >
+          No activities scheduled for this day
         </div>
       </div>
     </div>
@@ -233,6 +305,7 @@ const fetchPeople = async () => {
 
 const addActivity = async () => {
   if (!newActivity.value.name.trim()) return
+  error.value = null // Clear previous errors
   
   try {
     const response = await axios.post('/api/activities', {
@@ -254,18 +327,29 @@ const addActivity = async () => {
     }
     showAddForm.value = false
   } catch (err) {
-    error.value = 'Failed to add activity'
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else if (err.response?.data?.errors) {
+      error.value = Object.values(err.response.data.errors).flat().join('\n')
+    } else {
+      error.value = 'Failed to add activity'
+    }
   }
 }
 
 const deleteActivity = async (activity) => {
   if (!confirm('Are you sure you want to delete this activity?')) return
+  error.value = null // Clear previous errors
 
   try {
     await axios.delete(`/api/activities/${activity.id}`)
     activities.value = activities.value.filter(a => a.id !== activity.id)
   } catch (err) {
-    error.value = 'Failed to delete activity'
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else {
+      error.value = 'Failed to delete activity'
+    }
   }
 }
 
@@ -298,6 +382,51 @@ const handleKeyPress = (event) => {
   }
 }
 
+const startEdit = (activity) => {
+  // Create a deep copy of the activity and ensure time values are in HH:mm format
+  editingActivity.value = {
+    ...activity,
+    start_time: activity.start_time.substring(0, 5), // Get only HH:mm part
+    end_time: activity.end_time.substring(0, 5), // Get only HH:mm part
+  }
+}
+
+const cancelEdit = () => {
+  editingActivity.value = null
+  error.value = null
+}
+
+const updateActivity = async () => {
+  if (!editingActivity.value) return
+  error.value = null // Clear previous errors
+
+  try {
+    const response = await axios.put(`/api/activities/${editingActivity.value.id}`, {
+      name: editingActivity.value.name.trim(),
+      person_id: editingActivity.value.person_id,
+      start_time: editingActivity.value.start_time,
+      end_time: editingActivity.value.end_time,
+      day_of_week: editingActivity.value.day_of_week
+    })
+    
+    const index = activities.value.findIndex(a => a.id === editingActivity.value.id)
+    if (index !== -1) {
+      activities.value[index] = response.data
+    }
+    
+    editingActivity.value = null
+  } catch (err) {
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else if (err.response?.data?.errors) {
+      error.value = Object.values(err.response.data.errors).flat().join('\n')
+    } else {
+      error.value = 'Failed to update activity'
+    }
+    console.error('Update error:', err.response?.data)
+  }
+}
+
 onMounted(() => {
   fetchActivities()
   fetchPeople()
@@ -306,7 +435,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Remove keyboard event listener when component is destroyed
+  // Remove keyboard event listener
   window.removeEventListener('keydown', handleKeyPress)
 })
 </script>
