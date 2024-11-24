@@ -9,7 +9,7 @@
               to="/" 
               class="flex items-center px-4 text-lg font-medium text-blue-600 hover:text-blue-800"
             >
-              🏠 Hizzle Management
+              <span class="text-4xl mr-1">🏠</span> Hizzle Management
             </router-link>
           </div>
           <div class="flex space-x-4">
