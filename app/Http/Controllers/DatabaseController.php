@@ -22,12 +22,18 @@ class DatabaseController extends Controller
         try {
             Log::info('Starting database reset process');
             
-            // Clear all tables
-            ListItem::truncate();
-            CustomList::truncate();
-            Todo::truncate();
-            Activity::truncate();
-            Person::truncate();
+            // Disable foreign key checks
+            DB::statement('PRAGMA foreign_keys = OFF');
+            
+            // Clear all tables in the correct order
+            DB::table('list_items')->truncate();
+            DB::table('custom_lists')->truncate();
+            DB::table('todos')->truncate();
+            DB::table('activities')->truncate();
+            DB::table('people')->truncate();
+            
+            // Re-enable foreign key checks
+            DB::statement('PRAGMA foreign_keys = ON');
             
             Log::info('All tables cleared');
             
@@ -55,6 +61,9 @@ class DatabaseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+            
+            // Make sure to re-enable foreign keys even if there's an error
+            DB::statement('PRAGMA foreign_keys = ON');
             
             return response()->json([
                 'message' => 'Failed to reset database: ' . $e->getMessage(),

@@ -6,10 +6,13 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import axios from 'axios';
 
+const emit = defineEmits(['easter-egg-success', 'error']);
+
 const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let currentIndex = 0;
 const message = ref('');
 const isResetting = ref(false);
+let activeMessageDiv = null;
 
 const handleKeydown = (event) => {
   // Check if the pressed key matches the next key in the sequence
@@ -31,6 +34,11 @@ const handleKeydown = (event) => {
 };
 
 const showMessage = (messageText, isError = false) => {
+  // Remove any existing message
+  if (activeMessageDiv && document.body.contains(activeMessageDiv)) {
+    document.body.removeChild(activeMessageDiv);
+  }
+
   const messageDiv = document.createElement('div');
   messageDiv.textContent = messageText;
   messageDiv.style.position = 'fixed';
@@ -47,7 +55,17 @@ const showMessage = (messageText, isError = false) => {
   messageDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
   document.body.appendChild(messageDiv);
   
+  activeMessageDiv = messageDiv;
   return messageDiv;
+};
+
+const removeMessage = (messageDiv) => {
+  if (messageDiv && document.body.contains(messageDiv)) {
+    document.body.removeChild(messageDiv);
+  }
+  if (activeMessageDiv === messageDiv) {
+    activeMessageDiv = null;
+  }
 };
 
 const triggerEasterEgg = async () => {
@@ -59,6 +77,8 @@ const triggerEasterEgg = async () => {
     
     // Add some sparkles or confetti effect
     const emojis = ['✨', '🌟', '⭐', '💫', '🎉'];
+    const emojiElements = [];
+    
     for (let i = 0; i < 20; i++) {
       const emoji = document.createElement('div');
       emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
@@ -67,10 +87,7 @@ const triggerEasterEgg = async () => {
       emoji.style.top = Math.random() * 100 + 'vh';
       emoji.style.animation = 'fall 3s forwards';
       document.body.appendChild(emoji);
-      
-      setTimeout(() => {
-        document.body.removeChild(emoji);
-      }, 3000);
+      emojiElements.push(emoji);
     }
 
     // Reset the rotation after animation
@@ -78,40 +95,56 @@ const triggerEasterEgg = async () => {
       document.body.style.transform = 'none';
     }, 1000);
 
+    // Clean up emojis after animation
+    setTimeout(() => {
+      emojiElements.forEach(emoji => {
+        if (document.body.contains(emoji)) {
+          document.body.removeChild(emoji);
+        }
+      });
+    }, 3000);
+
     // Show loading message
     messageDiv = showMessage('🎮 Resetting Database... 🎮');
 
     await resetDatabase();
   } catch (error) {
+    emit('error', 'Failed to trigger easter egg: ' + error.message);
+    
     // Show error message
     if (messageDiv) {
-      messageDiv.textContent = '❌ Database Reset Failed! Check console for details ❌';
+      messageDiv.textContent = '❌ Database Reset Failed! ❌';
       messageDiv.style.backgroundColor = '#f44336';
     } else {
-      messageDiv = showMessage('❌ Database Reset Failed! Check console for details ❌', true);
+      messageDiv = showMessage('❌ Database Reset Failed! ❌', true);
     }
     
     // Remove error message after delay
-    setTimeout(() => {
-      document.body.removeChild(messageDiv);
-    }, 5000);
+    setTimeout(() => removeMessage(messageDiv), 5000);
   }
 };
 
 const resetDatabase = async () => {
+  if (isResetting.value) return;
+  
   isResetting.value = true;
   message.value = 'Resetting database...';
   
   try {
-    await axios.post('/api/reset-database');
-    this.$emit('easter-egg-success');
+    const response = await axios.post('/reset-database');
+    emit('easter-egg-success');
     message.value = 'Database reset successful! Reloading...';
+    
+    // Show success message before reload
+    showMessage('🎉 Database reset successful! Reloading... 🎉');
+    
     setTimeout(() => {
       window.location.reload();
     }, 1500);
   } catch (error) {
-    this.$emit('error', 'Failed to trigger easter egg: ' + error.message);
+    emit('error', 'Failed to reset database: ' + error.message);
     message.value = 'Failed to reset database. Please try again.';
+    throw error; // Re-throw to be handled by triggerEasterEgg
   } finally {
     setTimeout(() => {
       message.value = '';
@@ -127,6 +160,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  // Clean up any remaining message
+  if (activeMessageDiv) {
+    removeMessage(activeMessageDiv);
+  }
 });
 </script>
 
