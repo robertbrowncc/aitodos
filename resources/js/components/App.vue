@@ -14,6 +14,13 @@
           </div>
           <div class="flex space-x-4">
             <router-link 
+              to="/lists" 
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
+              :class="{ 'text-blue-800': $route.path === '/lists' }"
+            >
+              Lists
+            </router-link>
+            <router-link 
               to="/todos" 
               class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
               :class="{ 'text-blue-800': $route.path === '/todos' }"

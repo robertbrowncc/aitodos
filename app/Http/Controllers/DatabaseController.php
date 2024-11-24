@@ -22,25 +22,25 @@ class DatabaseController extends Controller
             $databasePath = database_path('database.sqlite');
             Log::info('Database path: ' . $databasePath);
             
-            // Ensure the database file exists and is writable
-            if (!File::exists($databasePath)) {
-                File::put($databasePath, '');
+            // Delete the existing database file
+            if (File::exists($databasePath)) {
+                File::delete($databasePath);
             }
+            
+            // Create a new empty database file
+            File::put($databasePath, '');
             chmod($databasePath, 0666);
-            Log::info('Database file permissions updated');
+            Log::info('Created new database file');
             
             // Clear config and cache
             Artisan::call('config:clear');
             Artisan::call('cache:clear');
             Log::info('Config and cache cleared');
             
-            // Run the migrations fresh with seed
-            Log::info('Starting migrate:fresh --seed');
-            $migrateOutput = Artisan::call('migrate:fresh', [
+            // Run the migrations with seed
+            $migrateOutput = Artisan::call('migrate', [
                 '--seed' => true,
-                '--force' => true,
-                '--no-interaction' => true,
-                '--database' => 'sqlite'
+                '--force' => true
             ]);
             
             $output = Artisan::output();

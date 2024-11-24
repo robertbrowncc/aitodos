@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Database\Seeders\PersonSeeder;
 use Database\Seeders\TodoSeeder;
 use Database\Seeders\ActivitySeeder;
+use Database\Seeders\ListSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +25,7 @@ class DatabaseSeeder extends Seeder
             PersonSeeder::class,
             TodoSeeder::class,
             ActivitySeeder::class,
+            ListSeeder::class,
         ]);
     }
 }

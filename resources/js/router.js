@@ -3,6 +3,7 @@ import Welcome from './components/Welcome.vue'
 import TodoList from './components/TodoList.vue'
 import PeopleList from './components/PeopleList.vue'
 import ActivityList from './components/ActivityList.vue'
+import Lists from './components/Lists.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/activities',
     name: 'activities',
     component: ActivityList
+  },
+  {
+    path: '/lists',
+    name: 'lists',
+    component: Lists
   }
 ]
 
