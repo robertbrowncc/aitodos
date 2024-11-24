@@ -14,11 +14,11 @@
           </div>
           <div class="flex space-x-4">
             <router-link 
-              to="/lists" 
+              to="/checklists" 
               class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
-              :class="{ 'text-blue-800': $route.path === '/lists' }"
+              :class="{ 'text-blue-800': $route.path === '/checklists' }"
             >
-              Lists
+              Checklists
             </router-link>
             <router-link 
               to="/todos" 

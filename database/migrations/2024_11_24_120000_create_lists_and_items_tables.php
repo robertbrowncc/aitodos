@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('custom_lists', function (Blueprint $table) {
+        Schema::create('checklists', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
@@ -16,9 +16,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('list_items', function (Blueprint $table) {
+        Schema::create('checklist_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('list_id')->constrained('custom_lists')->onDelete('cascade');
+            $table->foreignId('checklist_id')->constrained('checklists')->onDelete('cascade');
             $table->string('content');
             $table->integer('order')->default(0);
             $table->boolean('completed')->default(false);
@@ -28,7 +28,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('list_items');
-        Schema::dropIfExists('custom_lists');
+        Schema::dropIfExists('checklist_items');
+        Schema::dropIfExists('checklists');
     }
 };

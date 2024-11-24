@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ListItem;
-use App\Models\CustomList;
+use App\Models\Checklist;
+use App\Models\ChecklistItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ListItemController extends Controller
+class ChecklistItemController extends Controller
 {
-    public function index(CustomList $list)
+    public function index(Checklist $checklist)
     {
-        return $list->items()->orderBy('order')->get();
+        return $checklist->items()->orderBy('order')->get();
     }
 
-    public function store(Request $request, CustomList $list)
+    public function store(Request $request, Checklist $checklist)
     {
         $validated = $request->validate([
             'content' => 'required|string|max:255',
@@ -23,15 +23,15 @@ class ListItemController extends Controller
         ]);
 
         // Get the highest order number and add 1
-        $maxOrder = $list->items()->max('order') ?? -1;
+        $maxOrder = $checklist->items()->max('order') ?? -1;
         $validated['order'] = $maxOrder + 1;
-        $validated['list_id'] = $list->id;
+        $validated['checklist_id'] = $checklist->id;
 
-        $item = ListItem::create($validated);
+        $item = ChecklistItem::create($validated);
         return $item;
     }
 
-    public function update(Request $request, CustomList $list, ListItem $item)
+    public function update(Request $request, Checklist $checklist, ChecklistItem $item)
     {
         $validated = $request->validate([
             'content' => 'sometimes|required|string|max:255',
@@ -40,55 +40,55 @@ class ListItemController extends Controller
         ]);
 
         if (isset($validated['order'])) {
-            $this->reorderItems($list, $item, $validated['order']);
+            $this->reorderItems($checklist, $item, $validated['order']);
         }
 
         $item->update($validated);
         return $item;
     }
 
-    public function destroy(CustomList $list, ListItem $item)
+    public function destroy(Checklist $checklist, ChecklistItem $item)
     {
         $oldOrder = $item->order;
         $item->delete();
 
         // Reorder remaining items
-        $list->items()
+        $checklist->items()
             ->where('order', '>', $oldOrder)
             ->update(['order' => DB::raw('`order` - 1')]);
 
         return response()->noContent();
     }
 
-    public function reorder(Request $request, CustomList $list)
+    public function reorder(Request $request, Checklist $checklist)
     {
         $validated = $request->validate([
             'order' => 'required|array',
-            'order.*' => 'integer|distinct|exists:list_items,id'
+            'order.*' => 'integer|distinct|exists:checklist_items,id'
         ]);
 
-        // Verify all items belong to this list
-        $itemCount = $list->items()
+        // Verify all items belong to this checklist
+        $itemCount = $checklist->items()
             ->whereIn('id', $validated['order'])
             ->count();
 
         if ($itemCount !== count($validated['order'])) {
             return response()->json([
-                'message' => 'All items must belong to the list'
+                'message' => 'All items must belong to the checklist'
             ], 422);
         }
 
         try {
-            DB::transaction(function () use ($list, $validated) {
+            DB::transaction(function () use ($checklist, $validated) {
                 foreach ($validated['order'] as $index => $itemId) {
-                    $list->items()
+                    $checklist->items()
                         ->where('id', $itemId)
                         ->update(['order' => $index]);
                 }
             });
 
             // Return the updated items
-            return $list->items()
+            return $checklist->items()
                 ->orderBy('order')
                 ->get();
 
@@ -99,7 +99,7 @@ class ListItemController extends Controller
         }
     }
 
-    protected function reorderItems(CustomList $list, ListItem $item, int $newOrder)
+    protected function reorderItems(Checklist $checklist, ChecklistItem $item, int $newOrder)
     {
         $oldOrder = $item->order;
         
@@ -109,14 +109,14 @@ class ListItemController extends Controller
 
         if ($oldOrder < $newOrder) {
             // Moving down: decrement items in between
-            $list->items()
+            $checklist->items()
                 ->where('order', '>', $oldOrder)
                 ->where('order', '<=', $newOrder)
                 ->where('id', '!=', $item->id)
                 ->update(['order' => DB::raw('`order` - 1')]);
         } else {
             // Moving up: increment items in between
-            $list->items()
+            $checklist->items()
                 ->where('order', '>=', $newOrder)
                 ->where('order', '<', $oldOrder)
                 ->where('id', '!=', $item->id)

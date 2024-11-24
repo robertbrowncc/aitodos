@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\CustomList;
+use App\Models\Checklist;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-class ListController extends Controller
+class ChecklistController extends Controller
 {
     public function index()
     {
-        return CustomList::with(['person', 'items' => function ($query) {
+        return Checklist::with(['person', 'items' => function ($query) {
             $query->orderBy('order');
         }])->latest()->get();
     }
@@ -24,18 +24,18 @@ class ListController extends Controller
             'person_id' => 'nullable|exists:people,id',
         ]);
 
-        $list = CustomList::create($validated);
-        return $list->load(['person', 'items']);
+        $checklist = Checklist::create($validated);
+        return $checklist->load(['person', 'items']);
     }
 
-    public function show(CustomList $list)
+    public function show(Checklist $checklist)
     {
-        return $list->load(['person', 'items' => function ($query) {
+        return $checklist->load(['person', 'items' => function ($query) {
             $query->orderBy('order');
         }]);
     }
 
-    public function update(Request $request, CustomList $list)
+    public function update(Request $request, Checklist $checklist)
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -43,13 +43,13 @@ class ListController extends Controller
             'person_id' => 'nullable|exists:people,id',
         ]);
 
-        $list->update($validated);
-        return $list->load(['person', 'items']);
+        $checklist->update($validated);
+        return $checklist->load(['person', 'items']);
     }
 
-    public function destroy(CustomList $list)
+    public function destroy(Checklist $checklist)
     {
-        $list->delete();
+        $checklist->delete();
         return response()->noContent();
     }
 }

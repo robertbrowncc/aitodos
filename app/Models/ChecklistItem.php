@@ -6,15 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ListItem extends Model
+class ChecklistItem extends Model
 {
     use HasFactory;
+
+    protected $table = 'checklist_items';
 
     protected $fillable = [
         'content',
         'order',
         'completed',
-        'list_id',
+        'checklist_id',
     ];
 
     protected $casts = [
@@ -22,8 +24,8 @@ class ListItem extends Model
         'order' => 'integer',
     ];
 
-    public function list(): BelongsTo
+    public function checklist(): BelongsTo
     {
-        return $this->belongsTo(CustomList::class, 'list_id');
+        return $this->belongsTo(Checklist::class);
     }
 }

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CustomList extends Model
+class Checklist extends Model
 {
     use HasFactory;
 
-    protected $table = 'custom_lists';
+    protected $table = 'checklists';
 
     protected $fillable = [
         'name',
@@ -21,7 +21,7 @@ class CustomList extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(ListItem::class, 'list_id')->orderBy('order');
+        return $this->hasMany(ChecklistItem::class, 'checklist_id')->orderBy('order');
     }
 
     public function person(): BelongsTo

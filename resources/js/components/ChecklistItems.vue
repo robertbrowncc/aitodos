@@ -1,5 +1,5 @@
 <template>
-  <div class="list-items">
+  <div class="checklist-items">
     <!-- Add Item Form -->
     <form @submit.prevent="addItem" class="mb-4">
       <div class="flex space-x-2">
@@ -22,8 +22,7 @@
     </div>
     
     <TransitionGroup
-      v-else
-      name="list"
+      name="checklist"
       tag="div"
       class="space-y-2"
     >
@@ -65,9 +64,9 @@
 import axios from 'axios'
 
 export default {
-  name: 'ListItems',
+  name: 'ChecklistItems',
   props: {
-    list: {
+    checklist: {
       type: Object,
       required: true
     }
@@ -80,7 +79,7 @@ export default {
     }
   },
   watch: {
-    'list.id': {
+    'checklist.id': {
       immediate: true,
       handler() {
         this.fetchItems()
@@ -90,17 +89,17 @@ export default {
   methods: {
     async fetchItems() {
       try {
-        const response = await axios.get(`/api/lists/${this.list.id}/items`)
+        const response = await axios.get(`/api/checklists/${this.checklist.id}/items`)
         this.items = response.data
       } catch (error) {
-        this.$emit('error', 'Failed to load list items')
+        this.$emit('error', 'Failed to load checklist items')
       }
     },
     async addItem() {
       if (!this.newItemContent.trim()) return
       
       try {
-        const response = await axios.post(`/api/lists/${this.list.id}/items`, {
+        const response = await axios.post(`/api/checklists/${this.checklist.id}/items`, {
           content: this.newItemContent
         })
         this.items.push(response.data)
@@ -112,7 +111,7 @@ export default {
     async toggleComplete(item) {
       const newCompletedState = !item.completed
       try {
-        await axios.patch(`/api/lists/${this.list.id}/items/${item.id}`, {
+        await axios.patch(`/api/checklists/${this.checklist.id}/items/${item.id}`, {
           completed: newCompletedState
         })
         item.completed = newCompletedState
@@ -122,7 +121,7 @@ export default {
     },
     async deleteItem(item) {
       try {
-        await axios.delete(`/api/lists/${this.list.id}/items/${item.id}`)
+        await axios.delete(`/api/checklists/${this.checklist.id}/items/${item.id}`)
         const index = this.items.indexOf(item)
         if (index > -1) {
           this.items.splice(index, 1)
@@ -152,7 +151,7 @@ export default {
           order: index
         }))
         
-        await axios.post(`/api/lists/${this.list.id}/reorder`, {
+        await axios.post(`/api/checklists/${this.checklist.id}/reorder`, {
           order: updatedOrder.map(item => item.id)
         })
         
@@ -171,7 +170,7 @@ export default {
 </script>
 
 <style scoped>
-.list-items {
+.checklist-items {
   min-height: 50px;
 }
 
@@ -192,23 +191,18 @@ export default {
 }
 
 /* Transition styles */
-.list-move {
+.checklist-move {
   transition: transform 0.3s ease;
 }
 
-.list-enter-active,
-.list-leave-active {
+.checklist-enter-active,
+.checklist-leave-active {
   transition: all 0.3s ease;
 }
 
-.list-enter-from,
-.list-leave-to {
+.checklist-enter-from,
+.checklist-leave-to {
   opacity: 0;
-  transform: translateX(30px);
-}
-
-.dragging {
-  opacity: 0.5;
-  background-color: #e5e7eb;
+  transform: translateY(30px);
 }
 </style>

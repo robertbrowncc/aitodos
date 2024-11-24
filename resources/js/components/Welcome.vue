@@ -9,11 +9,11 @@
               <div class="mt-5 space-y-4">
                 <div class="grid grid-cols-2 gap-6">
                   <router-link 
-                    to="/lists" 
+                    to="/checklists" 
                     class="flex flex-col items-center justify-center aspect-square p-6 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
                     <span class="text-4xl mb-2">📋</span>
-                    <span class="text-lg">Lists</span>
+                    <span class="text-lg">Checklists</span>
                   </router-link>
                   <router-link 
                     to="/todos" 

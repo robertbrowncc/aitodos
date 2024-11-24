@@ -2,11 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\Api\PersonController;
+use App\Http\Controllers\Api\ChecklistController;
+use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ActivityController;
-use App\Http\Controllers\Api\ListController;
-use App\Http\Controllers\Api\ListItemController;
 use App\Http\Controllers\DatabaseController;
 
 /*
@@ -20,14 +19,10 @@ use App\Http\Controllers\DatabaseController;
 |
 */
 
-Route::apiResource('todos', TodoController::class);
 Route::apiResource('people', PersonController::class);
+Route::apiResource('checklists', ChecklistController::class);
+Route::apiResource('checklist-items', ChecklistItemController::class);
 Route::apiResource('activities', ActivityController::class);
-
-// List routes
-Route::apiResource('lists', ListController::class);
-Route::apiResource('lists.items', ListItemController::class);
-Route::post('lists/{list}/reorder', [ListItemController::class, 'reorder']);
 
 // Konami code endpoint
 Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);

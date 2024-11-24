@@ -3,7 +3,7 @@ import Welcome from './components/Welcome.vue'
 import TodoList from './components/TodoList.vue'
 import PeopleList from './components/PeopleList.vue'
 import ActivityList from './components/ActivityList.vue'
-import Lists from './components/Lists.vue'
+import Checklists from './components/Checklists.vue'
 
 const routes = [
   {
@@ -27,9 +27,9 @@ const routes = [
     component: ActivityList
   },
   {
-    path: '/lists',
-    name: 'lists',
-    component: Lists
+    path: '/checklists',
+    name: 'checklists',
+    component: Checklists
   }
 ]
 
