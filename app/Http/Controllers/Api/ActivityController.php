@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreActivityRequest;
+use App\Http\Requests\UpdateActivityRequest;
 use App\Models\Activity;
-use Illuminate\Http\Request;
 
 class ActivityController extends Controller
 {
@@ -13,17 +14,9 @@ class ActivityController extends Controller
         return Activity::with('person')->orderBy('day_of_week')->orderBy('start_time')->get();
     }
 
-    public function store(Request $request)
+    public function store(StoreActivityRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'person_id' => 'required|exists:people,id',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            'day_of_week' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
-        ]);
-
-        $activity = Activity::create($validated);
+        $activity = Activity::create($request->validated());
         return $activity->load('person');
     }
 
@@ -32,17 +25,9 @@ class ActivityController extends Controller
         return $activity->load('person');
     }
 
-    public function update(Request $request, Activity $activity)
+    public function update(UpdateActivityRequest $request, Activity $activity)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'person_id' => 'required|exists:people,id',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            'day_of_week' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
-        ]);
-
-        $activity->update($validated);
+        $activity->update($request->validated());
         return $activity->fresh()->load('person');
     }
 

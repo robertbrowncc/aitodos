@@ -5,7 +5,8 @@
         <div class="max-w-md mx-auto">
           <div class="divide-y divide-gray-200">
             <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-              <h2 class="text-3xl font-bold text-center mb-8 text-blue-600">Manage the Shizzle Bizzle</h2>
+              <h2 class="text-3xl font-bold text-center mb-4 text-blue-600">Manage the Shizzle Bizzle</h2>
+              <p class="text-center text-gray-600 mb-8">Your all-in-one solution for managing tasks, checklists, and team activities.</p>
               <div class="mt-5 space-y-4">
                 <div class="grid grid-cols-2 gap-6">
                   <router-link 

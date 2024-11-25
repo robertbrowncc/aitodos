@@ -1,0 +1,23 @@
+{
+  "november_2024": {
+    "1": "ALLERHEILIGEN",
+    "2": "Recyclagepark gesloten",
+    "7": ["HUISVUIL", "GFT"],
+    "11": "WAPENSTILSTAND",
+    "14": "PMD",
+    "21": ["HUISVUIL", "GFT"],
+    "25": "PAPIER & KARTON",
+    "27": "OUDE METALEN",
+    "28": "PMD"
+  },
+  "december_2024": {
+    "4": "GROFVUIL (Betalend)",
+    "5": ["HUISVUIL", "GFT"],
+    "12": "PMD",
+    "19": ["HUISVUIL", "GFT"],
+    "23": "PAPIER & KARTON",
+    "25": "KERSTMIS",
+    "26": "PMD",
+    "30": "Brugdag recyclageparkwachters"
+  }
+}

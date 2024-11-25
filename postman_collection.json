@@ -1,0 +1,328 @@
+{
+	"info": {
+		"_postman_id": "random-uuid",
+		"name": "AI Todos API",
+		"description": "Collection of all API endpoints for the AI Todos application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Todos",
+			"item": [
+				{
+					"name": "List Todos",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/todos",
+						"description": "Get all todos with their associated person"
+					}
+				},
+				{
+					"name": "Create Todo",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/todos",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sample Todo\",\n    \"url\": \"https://example.com\",\n    \"person_id\": 1,\n    \"completed\": false\n}"
+						},
+						"description": "Create a new todo item"
+					}
+				},
+				{
+					"name": "Update Todo",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/api/todos/:id",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Todo\",\n    \"url\": \"https://example.com\",\n    \"person_id\": 1,\n    \"completed\": true\n}"
+						},
+						"description": "Update an existing todo"
+					}
+				},
+				{
+					"name": "Delete Todo",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/todos/:id",
+						"description": "Delete a todo item"
+					}
+				}
+			]
+		},
+		{
+			"name": "People",
+			"item": [
+				{
+					"name": "List People",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/people",
+						"description": "Get all people"
+					}
+				},
+				{
+					"name": "Create Person",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/people",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\"\n}"
+						},
+						"description": "Create a new person"
+					}
+				},
+				{
+					"name": "Update Person",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/api/people/:id",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Jane Doe\"\n}"
+						},
+						"description": "Update an existing person"
+					}
+				},
+				{
+					"name": "Delete Person",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/people/:id",
+						"description": "Delete a person"
+					}
+				}
+			]
+		},
+		{
+			"name": "Checklists",
+			"item": [
+				{
+					"name": "List Checklists",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/checklists",
+						"description": "Get all checklists with their items and associated person"
+					}
+				},
+				{
+					"name": "Create Checklist",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/checklists",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Checklist\",\n    \"description\": \"A sample checklist\",\n    \"person_id\": 1\n}"
+						},
+						"description": "Create a new checklist"
+					}
+				},
+				{
+					"name": "Update Checklist",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/api/checklists/:id",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Checklist\",\n    \"description\": \"Updated description\",\n    \"person_id\": 1\n}"
+						},
+						"description": "Update an existing checklist"
+					}
+				},
+				{
+					"name": "Delete Checklist",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/checklists/:id",
+						"description": "Delete a checklist"
+					}
+				},
+				{
+					"name": "Get Checklist Items",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/checklists/:checklist/items",
+						"description": "Get all items in a checklist"
+					}
+				},
+				{
+					"name": "Create Checklist Item",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/checklists/:checklist/items",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"New checklist item\",\n    \"completed\": false\n}"
+						},
+						"description": "Create a new checklist item"
+					}
+				},
+				{
+					"name": "Update Checklist Item",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/api/checklists/:checklist/items/:item",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Updated item\",\n    \"completed\": true,\n    \"order\": 1\n}"
+						},
+						"description": "Update an existing checklist item"
+					}
+				},
+				{
+					"name": "Delete Checklist Item",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/checklists/:checklist/items/:item",
+						"description": "Delete a checklist item"
+					}
+				},
+				{
+					"name": "Reorder Checklist Items",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/checklists/:checklist/reorder",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order\": [1, 2, 3, 4]\n}"
+						},
+						"description": "Reorder items in a checklist"
+					}
+				}
+			]
+		},
+		{
+			"name": "Activities",
+			"item": [
+				{
+					"name": "List Activities",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/activities",
+						"description": "Get all activities"
+					}
+				},
+				{
+					"name": "Create Activity",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/activities",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Activity\"\n}"
+						},
+						"description": "Create a new activity"
+					}
+				},
+				{
+					"name": "Update Activity",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/api/activities/:id",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Activity\"\n}"
+						},
+						"description": "Update an existing activity"
+					}
+				},
+				{
+					"name": "Delete Activity",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/activities/:id",
+						"description": "Delete an activity"
+					}
+				}
+			]
+		},
+		{
+			"name": "Database",
+			"item": [
+				{
+					"name": "Reset Database",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/reset-database",
+						"description": "Reset the database to its initial state"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://aitodos.test",
+			"type": "string"
+		}
+	]
+}
