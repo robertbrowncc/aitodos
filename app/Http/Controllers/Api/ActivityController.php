@@ -23,7 +23,8 @@ class ActivityController extends Controller
             'day_of_week' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
         ]);
 
-        return Activity::create($validated);
+        $activity = Activity::create($validated);
+        return $activity->load('person');
     }
 
     public function show(Activity $activity)
