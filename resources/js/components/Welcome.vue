@@ -38,6 +38,7 @@
                   </router-link>
                 </div>
               </div>
+              <WeatherWidget />
             </div>
           </div>
         </div>
@@ -47,4 +48,5 @@
 </template>
 
 <script setup>
+import WeatherWidget from './WeatherWidget.vue';
 </script>
