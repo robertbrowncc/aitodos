@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Models\Todo;
 use App\Models\Person;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\TodoResource;
-use App\Http\Resources\PersonResource;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
-use App\Traits\ApiResponse;
+use App\Http\Resources\TodoResource;
+use App\Http\Resources\PersonResource;
+use App\Http\Controllers\Api\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
 class TodoController extends Controller

@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonRequest;
 use App\Http\Requests\UpdatePersonRequest;
+use App\Http\Resources\PersonResource;
 use App\Models\Person;
-use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Api\Traits\ApiResponse;
 
 class PersonController extends Controller
 {
