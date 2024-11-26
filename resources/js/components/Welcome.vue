@@ -39,7 +39,7 @@
                   </router-link>
                 </div>
               </div>
-              <div class="mt-8 grid grid-cols-2 gap-4">
+              <div class="mt-8 grid grid-cols-3 gap-4">
                 <div class="col-span-1">
                   <WeatherWidget />
                 </div>
@@ -54,6 +54,9 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-span-1">
+                  <HolidayWidget />
+                </div>
               </div>
             </div>
           </div>
@@ -65,6 +68,7 @@
 
 <script setup>
 import WeatherWidget from './WeatherWidget.vue';
+import HolidayWidget from './HolidayWidget.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 

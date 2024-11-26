@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\Api\WeatherController;
+use App\Http\Controllers\Api\HolidayController;
 use App\Http\Controllers\DatabaseController;
 
 /*
@@ -39,8 +40,9 @@ Route::middleware('api')->group(function () {
     Route::apiResource('activities', ActivityController::class);
     Route::get('activities/person/{person}', [ActivityController::class, 'getActivitiesForPerson']);
 
-    // Weather route
+    // Weather and Holidays routes
     Route::get('weather', [WeatherController::class, 'getWeather']);
+    Route::get('holidays/upcoming', [HolidayController::class, 'upcomingHolidays']);
 });
 
 // Database reset route (local only)
