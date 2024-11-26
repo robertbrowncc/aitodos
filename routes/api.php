@@ -21,22 +21,27 @@ use App\Http\Controllers\DatabaseController;
 |
 */
 
-Route::apiResource('todos', TodoController::class);
-Route::apiResource('people', PersonController::class);
-Route::apiResource('checklists', ChecklistController::class);
+Route::middleware('api')->group(function () {
+    // Resource routes
+    Route::apiResource('todos', TodoController::class);
+    Route::apiResource('people', PersonController::class);
+    Route::apiResource('checklists', ChecklistController::class);
 
-// Nested routes for checklist items
-Route::get('checklists/{checklist}/items', [ChecklistItemController::class, 'index']);
-Route::post('checklists/{checklist}/items', [ChecklistItemController::class, 'store']);
-Route::patch('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'update']);
-Route::delete('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'destroy']);
+    // Nested routes for checklist items
+    Route::get('checklists/{checklist}/items', [ChecklistItemController::class, 'index']);
+    Route::post('checklists/{checklist}/items', [ChecklistItemController::class, 'store']);
+    Route::patch('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'update']);
+    Route::delete('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'destroy']);
 
-// Activities routes
-Route::apiResource('activities', ActivityController::class);
-Route::get('activities/person/{person}', [ActivityController::class, 'getActivitiesForPerson']);
+    // Activities routes
+    Route::apiResource('activities', ActivityController::class);
+    Route::get('activities/person/{person}', [ActivityController::class, 'getActivitiesForPerson']);
+
+    // Weather route
+    Route::get('weather', [WeatherController::class, 'getWeather']);
+});
 
 // Database reset route (local only)
-Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);
-
-// Weather route
-Route::get('weather', [WeatherController::class, 'getWeather']);
+if (app()->environment('local')) {
+    Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);
+}
