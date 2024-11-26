@@ -28,6 +28,7 @@ Route::middleware('api')->group(function () {
     Route::apiResource('checklists', ChecklistController::class);
 
     // Nested routes for checklist items
+    Route::post('checklists/{checklist}/items/reorder', [ChecklistItemController::class, 'reorder']);
     Route::get('checklists/{checklist}/items', [ChecklistItemController::class, 'index']);
     Route::post('checklists/{checklist}/items', [ChecklistItemController::class, 'store']);
     Route::patch('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'update']);
