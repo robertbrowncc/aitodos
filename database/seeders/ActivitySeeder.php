@@ -14,77 +14,75 @@ class ActivitySeeder extends Seeder
     public function run(): void
     {
         $activities = [
-            // Work activities
+            // After-school activities (weekdays)
             [
-                'name' => 'Team Stand-up',
-                'start_time' => '09:30:00',
-                'end_time' => '10:00:00',
-                'days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-            ],
-            [
-                'name' => 'Lunch Break',
-                'start_time' => '12:00:00',
-                'end_time' => '13:00:00',
-                'days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-            ],
-            [
-                'name' => 'Project Planning',
-                'start_time' => '14:00:00',
-                'end_time' => '15:00:00',
-                'days' => ['Monday']
-            ],
-            // Exercise activities
-            [
-                'name' => 'Morning Gym',
-                'start_time' => '07:00:00',
-                'end_time' => '08:00:00',
-                'days' => ['Monday', 'Wednesday', 'Friday']
-            ],
-            [
-                'name' => 'Evening Yoga',
-                'start_time' => '18:00:00',
-                'end_time' => '19:00:00',
+                'name' => 'Soccer Practice',
+                'start_time' => '16:30:00',
+                'end_time' => '18:00:00',
                 'days' => ['Tuesday', 'Thursday']
             ],
-            // Social activities
             [
-                'name' => 'Book Club',
-                'start_time' => '19:00:00',
-                'end_time' => '20:30:00',
+                'name' => 'Piano Lessons',
+                'start_time' => '17:00:00',
+                'end_time' => '18:00:00',
                 'days' => ['Wednesday']
             ],
             [
-                'name' => 'Family Dinner',
-                'start_time' => '18:30:00',
-                'end_time' => '20:00:00',
-                'days' => ['Sunday']
+                'name' => 'Art Class',
+                'start_time' => '16:00:00',
+                'end_time' => '17:30:00',
+                'days' => ['Monday']
+            ],
+            [
+                'name' => 'Swimming Lessons',
+                'start_time' => '17:00:00',
+                'end_time' => '18:00:00',
+                'days' => ['Friday']
+            ],
+            [
+                'name' => 'Dance Class',
+                'start_time' => '16:30:00',
+                'end_time' => '17:30:00',
+                'days' => ['Tuesday']
             ],
             // Weekend activities
             [
-                'name' => 'Grocery Shopping',
+                'name' => 'Baseball Practice',
                 'start_time' => '10:00:00',
                 'end_time' => '11:30:00',
                 'days' => ['Saturday']
             ],
             [
-                'name' => 'Swimming Class',
-                'start_time' => '16:00:00',
-                'end_time' => '17:00:00',
+                'name' => 'Karate Class',
+                'start_time' => '11:00:00',
+                'end_time' => '12:00:00',
                 'days' => ['Saturday']
             ],
             [
-                'name' => 'Movie Night',
-                'start_time' => '20:00:00',
-                'end_time' => '22:30:00',
+                'name' => 'Coding Club',
+                'start_time' => '14:00:00',
+                'end_time' => '15:30:00',
+                'days' => ['Sunday']
+            ],
+            [
+                'name' => 'Family Game Night',
+                'start_time' => '19:00:00',
+                'end_time' => '20:30:00',
                 'days' => ['Friday']
+            ],
+            [
+                'name' => 'Library Reading Club',
+                'start_time' => '13:00:00',
+                'end_time' => '14:00:00',
+                'days' => ['Saturday']
             ]
         ];
 
         $people = Person::all();
 
         foreach ($people as $person) {
-            // Each person gets 3-5 random activities
-            $numActivities = rand(3, 5);
+            // Each person gets 2-3 random activities (reduced from 3-5)
+            $numActivities = rand(2, 3);
             $selectedActivities = collect($activities)->random($numActivities);
 
             foreach ($selectedActivities as $activity) {
