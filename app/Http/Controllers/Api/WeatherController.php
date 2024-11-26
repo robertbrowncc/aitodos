@@ -13,8 +13,20 @@ class WeatherController extends Controller
 {
     private const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
-    public function getWeather()
+    public function __construct()
     {
+        $this->middleware(function ($request, $next) {
+            $request->headers->set('Accept', 'application/json');
+            return $next($request);
+        });
+    }
+
+    public function getWeather(Request $request)
+    {
+        if (!$request->wantsJson()) {
+            return response()->json(['error' => 'JSON response required'], 406);
+        }
+
         // Apply rate limiting - 60 requests per minute
         $executed = RateLimiter::attempt(
             'weather_api',
@@ -90,7 +102,7 @@ class WeatherController extends Controller
                     ], 500);
                 }
                 
-                return $data;
+                return response()->json($data);
             } catch (\Exception $e) {
                 Log::error('Failed to fetch weather data', [
                     'error' => $e->getMessage(),

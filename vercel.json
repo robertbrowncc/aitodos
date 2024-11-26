@@ -12,13 +12,27 @@
             "dest": "/public/build/$1"
         },
         {
+            "src": "/favicon.ico",
+            "dest": "/public/favicon.ico"
+        },
+        {
+            "src": "/favicon.png",
+            "dest": "/public/favicon.png"
+        },
+        {
             "src": "/api/(.*)",
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept"
+                "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept",
+                "Content-Type": "application/json"
             },
+            "continue": true,
             "dest": "/api/index.php"
+        },
+        {
+            "src": "/(css|js|images|fonts|favicon)/(.*)",
+            "dest": "/public/$1/$2"
         },
         {
             "src": "/(.*)",
@@ -30,7 +44,7 @@
     "env": {
         "APP_NAME": "AI Todos",
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
@@ -42,6 +56,7 @@
         "SESSION_DRIVER": "cookie",
         "SESSION_LIFETIME": "120",
         "DB_CONNECTION": "sqlite",
-        "DB_DATABASE": "/tmp/database.sqlite"
+        "DB_DATABASE": "/tmp/database.sqlite",
+        "APP_URL": "https://aitodos.vercel.app"
     }
 }

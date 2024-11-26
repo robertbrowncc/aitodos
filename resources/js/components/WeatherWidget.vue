@@ -72,7 +72,12 @@ const fetchWeather = async () => {
   try {
     error.value = null;
     canRetry.value = true;
-    const response = await axios.get('/api/weather');
+    const response = await axios.get('/api/weather', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
     
     if (validateWeatherData(response.data)) {
       weather.value = response.data;
