@@ -142,16 +142,11 @@ const newTodo = ref({
 
 async function fetchTodos() {
   try {
-    console.log('Fetching todos from /api/todos...');
     const response = await axios.get('/api/todos');
-    console.log('Todos response:', response.data);
-    if (!Array.isArray(response.data)) {
-      throw new Error('Expected array of todos');
-    }
-    todos.value = response.data;
+    todos.value = response.data.data;
     error.value = '';
   } catch (err) {
-    error.value = 'Failed to load todos: ' + (err.message || 'Unknown error');
+    error.value = err.response?.data?.message || 'Failed to load todos';
     console.error('Error fetching todos:', err);
     todos.value = []; // Reset todos on error
   }
@@ -160,7 +155,7 @@ async function fetchTodos() {
 async function addTodo() {
   try {
     const response = await axios.post('/api/todos', newTodo.value)
-    todos.value.unshift(response.data)
+    todos.value.unshift(response.data.data)
     newTodo.value = {
       name: '',
       url: '',
@@ -170,7 +165,7 @@ async function addTodo() {
     showAddForm.value = false
     error.value = ''
   } catch (err) {
-    error.value = 'Failed to add todo'
+    error.value = err.response?.data?.message || 'Failed to add todo'
     console.error('Error adding todo:', err)
   }
 }
@@ -180,11 +175,11 @@ async function toggleTodo(todo) {
     const response = await axios.patch(`/api/todos/${todo.id}`, {
       completed: !todo.completed
     })
-    Object.assign(todo, response.data)
+    Object.assign(todo, response.data.data)
     error.value = ''
   } catch (err) {
     todo.completed = !todo.completed // Revert the change
-    error.value = 'Failed to update todo'
+    error.value = err.response?.data?.message || 'Failed to update todo'
     console.error('Error updating todo:', err)
   }
 }
@@ -194,12 +189,11 @@ async function updateAssignment(todo) {
     const response = await axios.patch(`/api/todos/${todo.id}`, {
       person_id: todo.person_id
     })
-    Object.assign(todo, response.data)
+    Object.assign(todo, response.data.data)
     error.value = ''
   } catch (err) {
-    error.value = 'Failed to update assignment'
+    error.value = err.response?.data?.message || 'Failed to update assignment'
     console.error('Error updating assignment:', err)
-    await fetchTodos() // Refresh to get the correct state
   }
 }
 
@@ -214,7 +208,7 @@ async function deleteTodo(todo) {
     }
     error.value = ''
   } catch (err) {
-    error.value = 'Failed to delete todo'
+    error.value = err.response?.data?.message || 'Failed to delete todo'
     console.error('Error deleting todo:', err)
   }
 }
@@ -226,16 +220,11 @@ onMounted(() => {
 
 async function fetchPeople() {
   try {
-    const response = await axios.get('/api/people', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
-    })
-    people.value = response.data
+    const response = await axios.get('/api/people')
+    people.value = response.data.data
   } catch (err) {
-    error.value = 'Failed to load people'
+    console.error('Error fetching people:', err)
+    error.value = err.response?.data?.message || 'Failed to load people'
   }
 }
 </script>

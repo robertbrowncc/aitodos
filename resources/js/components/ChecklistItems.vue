@@ -90,9 +90,9 @@ export default {
     async fetchItems() {
       try {
         const response = await axios.get(`/api/checklists/${this.checklist.id}/items`)
-        this.items = response.data
+        this.items = response.data.data
       } catch (error) {
-        this.$emit('error', 'Failed to load checklist items')
+        this.$emit('error', error.response?.data?.message || 'Failed to load checklist items')
       }
     },
     async addItem() {
@@ -102,21 +102,22 @@ export default {
         const response = await axios.post(`/api/checklists/${this.checklist.id}/items`, {
           content: this.newItemContent
         })
-        this.items.push(response.data)
+        this.items.push(response.data.data)
         this.newItemContent = ''
       } catch (error) {
-        this.$emit('error', 'Failed to add item')
+        this.$emit('error', error.response?.data?.message || 'Failed to add item')
       }
     },
     async toggleComplete(item) {
       const newCompletedState = !item.completed
       try {
-        await axios.patch(`/api/checklists/${this.checklist.id}/items/${item.id}`, {
+        const response = await axios.patch(`/api/checklists/${this.checklist.id}/items/${item.id}`, {
           completed: newCompletedState
         })
-        item.completed = newCompletedState
+        Object.assign(item, response.data.data)
       } catch (error) {
-        this.$emit('error', 'Failed to update item')
+        this.$emit('error', error.response?.data?.message || 'Failed to update item')
+        item.completed = !newCompletedState // Revert the change
       }
     },
     async deleteItem(item) {
@@ -127,7 +128,7 @@ export default {
           this.items.splice(index, 1)
         }
       } catch (error) {
-        this.$emit('error', 'Failed to delete item')
+        this.$emit('error', error.response?.data?.message || 'Failed to delete item')
       }
     },
     startDrag(event, index) {
@@ -145,12 +146,13 @@ export default {
       
       // Update order on server
       try {
-        await axios.post(`/api/checklists/${this.checklist.id}/reorder`, {
+        const response = await axios.post(`/api/checklists/${this.checklist.id}/reorder`, {
           order: this.items.map(item => item.id)
         })
+        // Update items with server response to ensure consistency
+        this.items = response.data.data
       } catch (error) {
-        console.error('Failed to update item order:', error)
-        this.$emit('error', 'Failed to update item order')
+        this.$emit('error', error.response?.data?.message || 'Failed to update item order')
         await this.fetchItems() // Refresh items to restore correct order
       }
       

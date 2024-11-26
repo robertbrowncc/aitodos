@@ -211,28 +211,21 @@ const sortedPeople = computed(() => {
   });
 })
 
-const fetchPeople = async () => {
+async function fetchPeople() {
   try {
     const response = await axios.get('/api/people')
-    people.value = response.data
+    people.value = response.data.data
+    error.value = null
   } catch (err) {
-    error.value = 'Failed to load people'
+    error.value = err.response?.data?.message || 'Failed to load people'
+    console.error('Error fetching people:', err)
   }
 }
 
-const addPerson = async () => {
-  if (!newPerson.value.name.trim()) return
-  error.value = null // Clear any previous errors
-  
+async function addPerson() {
   try {
-    const response = await axios.post('/api/people', {
-      name: newPerson.value.name.trim(),
-      email: newPerson.value.email,
-      phone: newPerson.value.phone,
-      date_of_birth: newPerson.value.date_of_birth,
-      address: newPerson.value.address
-    })
-    people.value.push(response.data)
+    const response = await axios.post('/api/people', newPerson.value)
+    people.value.push(response.data.data)
     newPerson.value = {
       name: '',
       email: '',
@@ -241,57 +234,52 @@ const addPerson = async () => {
       address: ''
     }
     showAddForm.value = false
+    error.value = null
   } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else if (err.response?.data?.errors) {
-      error.value = Object.values(err.response.data.errors).flat().join('\n')
-    } else {
-      error.value = 'Failed to add person'
-    }
+    error.value = err.response?.data?.message || 'Failed to create person'
+    console.error('Error adding person:', err)
   }
 }
 
-const startEdit = (person) => {
+async function startEdit(person) {
   editingPerson.value = { ...person }
   originalName.value = person.name
 }
 
-const cancelEdit = () => {
+async function cancelEdit() {
   editingPerson.value = null
 }
 
-const updatePerson = async () => {
-  if (!editingPerson.value.name.trim()) {
-    editingPerson.value.name = originalName.value
-    return
-  }
-  
+async function updatePerson() {
+  if (!editingPerson.value) return
+
   try {
-    await axios.put(`/api/people/${editingPerson.value.id}`, {
-      name: editingPerson.value.name.trim(),
-      email: editingPerson.value.email,
-      phone: editingPerson.value.phone,
-      date_of_birth: editingPerson.value.date_of_birth,
-      address: editingPerson.value.address
-    })
+    const response = await axios.patch(`/api/people/${editingPerson.value.id}`, editingPerson.value)
     const index = people.value.findIndex(p => p.id === editingPerson.value.id)
-    people.value[index] = editingPerson.value
+    if (index !== -1) {
+      people.value[index] = response.data.data
+    }
     editingPerson.value = null
+    error.value = null
   } catch (err) {
-    error.value = 'Failed to update person'
-    editingPerson.value.name = originalName.value
+    error.value = err.response?.data?.message || 'Failed to update person'
+    console.error('Error updating person:', err)
   }
 }
 
-const deletePerson = async (person) => {
+async function deletePerson(person) {
   if (!confirm(`Are you sure you want to delete ${person.name}?`)) return
-  
+
   try {
     await axios.delete(`/api/people/${person.id}`)
-    people.value = people.value.filter(p => p.id !== person.id)
+    const index = people.value.indexOf(person)
+    if (index !== -1) {
+      people.value.splice(index, 1)
+    }
+    error.value = null
   } catch (err) {
-    error.value = 'Failed to delete person'
+    error.value = err.response?.data?.message || 'Failed to delete person'
+    console.error('Error deleting person:', err)
   }
 }
 

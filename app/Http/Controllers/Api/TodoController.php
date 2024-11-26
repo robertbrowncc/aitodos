@@ -4,65 +4,67 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Todo;
 use App\Models\Person;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TodoResource;
+use App\Http\Resources\PersonResource;
+use App\Http\Requests\StoreTodoRequest;
+use App\Http\Requests\UpdateTodoRequest;
+use App\Http\Controllers\Api\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class TodoController extends Controller
 {
-    public function index()
+    use ApiResponse;
+
+    public function index(): JsonResponse
     {
-        return response()->json(
-            Todo::select('id', 'name', 'url', 'completed', 'person_id', 'created_at', 'updated_at')
-                ->with(['person' => function($query) {
-                    $query->select('id', 'name');
-                }])
-                ->latest()
-                ->get()
+        $todos = Todo::with(['person' => function($query) {
+            $query->select('id', 'name', 'first_name', 'last_name');
+        }])->latest()->get();
+
+        return $this->resourceCollectionResponse(
+            TodoResource::collection($todos),
+            'Todos retrieved successfully'
         );
     }
 
-    public function store(Request $request)
+    public function store(StoreTodoRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'url' => 'nullable|url|max:255',
-            'person_id' => 'nullable|exists:people,id',
-            'completed' => 'boolean'
-        ]);
+        $todo = Todo::create($request->validated());
 
-        // Set default value for completed if not provided
-        if (!isset($validated['completed'])) {
-            $validated['completed'] = false;
-        }
-
-        $todo = Todo::create($validated);
-        return $todo->load('person');
+        return $this->resourceResponse(
+            new TodoResource($todo->load('person')),
+            'Todo created successfully',
+            201
+        );
     }
 
-    public function update(Request $request, Todo $todo)
+    public function update(UpdateTodoRequest $request, Todo $todo): JsonResponse
     {
-        $validated = $request->validate([
-            'completed' => 'boolean',
-            'person_id' => 'nullable|exists:people,id',
-            'name' => 'sometimes|required|string|max:255',
-            'url' => 'nullable|url|max:255'
-        ]);
+        $todo->update($request->validated());
 
-        $todo->update($validated);
-        return $todo->load('person');
+        return $this->resourceResponse(
+            new TodoResource($todo->load('person')),
+            'Todo updated successfully'
+        );
     }
 
-    public function destroy(Todo $todo)
+    public function destroy(Todo $todo): JsonResponse
     {
         $todo->delete();
-        return response()->noContent();
+        return $this->noContentResponse();
     }
 
-    public function getPeople()
+    public function getPeople(): JsonResponse
     {
-        return Person::select('id', 'first_name', 'last_name')
+        $people = Person::select('id', 'first_name', 'last_name')
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
+
+        return $this->resourceCollectionResponse(
+            PersonResource::collection($people),
+            'People retrieved successfully'
+        );
     }
 }

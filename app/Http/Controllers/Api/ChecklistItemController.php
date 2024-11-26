@@ -5,22 +5,29 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Checklist;
 use App\Models\ChecklistItem;
+use App\Http\Resources\ChecklistItemResource;
+use App\Http\Requests\StoreChecklistItemRequest;
+use App\Http\Requests\UpdateChecklistItemRequest;
+use App\Http\Controllers\Api\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ChecklistItemController extends Controller
 {
+    use ApiResponse;
+
     public function index(Checklist $checklist)
     {
-        return $checklist->items()->orderBy('order')->get();
+        $items = $checklist->items()->orderBy('order')->get();
+        return $this->successResponse(
+            ChecklistItemResource::collection($items),
+            'Checklist items retrieved successfully'
+        );
     }
 
-    public function store(Request $request, Checklist $checklist)
+    public function store(StoreChecklistItemRequest $request, Checklist $checklist)
     {
-        $validated = $request->validate([
-            'content' => 'required|string|max:255',
-            'completed' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         // Get the highest order number and add 1
         $maxOrder = $checklist->items()->max('order') ?? -1;
@@ -28,23 +35,26 @@ class ChecklistItemController extends Controller
         $validated['checklist_id'] = $checklist->id;
 
         $item = ChecklistItem::create($validated);
-        return $item;
+        return $this->successResponse(
+            new ChecklistItemResource($item),
+            'Checklist item created successfully',
+            201
+        );
     }
 
-    public function update(Request $request, Checklist $checklist, ChecklistItem $item)
+    public function update(UpdateChecklistItemRequest $request, Checklist $checklist, ChecklistItem $item)
     {
-        $validated = $request->validate([
-            'content' => 'sometimes|required|string|max:255',
-            'completed' => 'sometimes|boolean',
-            'order' => 'sometimes|integer|min:0',
-        ]);
+        $validated = $request->validated();
 
         if (isset($validated['order'])) {
             $this->reorderItems($checklist, $item, $validated['order']);
         }
 
         $item->update($validated);
-        return $item;
+        return $this->successResponse(
+            new ChecklistItemResource($item),
+            'Checklist item updated successfully'
+        );
     }
 
     public function destroy(Checklist $checklist, ChecklistItem $item)
@@ -57,7 +67,11 @@ class ChecklistItemController extends Controller
             ->where('order', '>', $oldOrder)
             ->update(['order' => DB::raw('`order` - 1')]);
 
-        return response()->noContent();
+        return $this->successResponse(
+            null,
+            'Checklist item deleted successfully',
+            204
+        );
     }
 
     public function reorder(Request $request, Checklist $checklist)
@@ -73,9 +87,10 @@ class ChecklistItemController extends Controller
             ->count();
 
         if ($itemCount !== count($validated['order'])) {
-            return response()->json([
-                'message' => 'All items must belong to the checklist'
-            ], 422);
+            return $this->errorResponse(
+                'All items must belong to the checklist',
+                422
+            );
         }
 
         try {
@@ -88,14 +103,17 @@ class ChecklistItemController extends Controller
             });
 
             // Return the updated items
-            return $checklist->items()
-                ->orderBy('order')
-                ->get();
+            $items = $checklist->items()->orderBy('order')->get();
+            return $this->successResponse(
+                ChecklistItemResource::collection($items),
+                'Items reordered successfully'
+            );
 
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to update item order'
-            ], 500);
+            return $this->errorResponse(
+                'Failed to update item order',
+                500
+            );
         }
     }
 

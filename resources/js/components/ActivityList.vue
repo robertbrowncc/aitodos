@@ -261,8 +261,8 @@ const newActivity = ref({
   name: '',
   person_id: '',
   day_of_week: '',
-  start_time: '17:00',  // Set default start time to 17:00
-  end_time: '18:00'     // Set default end time to 18:00
+  start_time: '',
+  end_time: ''
 })
 
 // Function to calculate end time based on start time
@@ -307,76 +307,91 @@ const formatTime = (time) => {
   return new Date(`2000-01-01T${time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-const fetchActivities = async () => {
+async function fetchActivities() {
   try {
     const response = await axios.get('/api/activities')
-    activities.value = response.data
-    
-    // Initialize all days as collapsed
-    daysOfWeek.forEach(day => {
-      expandedDays.value[day] = false
-    })
+    activities.value = response.data.data
+    error.value = ''
   } catch (err) {
-    error.value = 'Failed to load activities'
+    error.value = err.response?.data?.message || 'Failed to load activities'
+    console.error('Error fetching activities:', err)
   }
 }
 
-const fetchPeople = async () => {
+async function fetchPeople() {
   try {
     const response = await axios.get('/api/people')
-    people.value = response.data
+    people.value = response.data.data
   } catch (err) {
-    error.value = 'Failed to load people'
+    error.value = err.response?.data?.message || 'Failed to load people'
+    console.error('Error fetching people:', err)
   }
 }
 
-const addActivity = async () => {
-  if (!newActivity.value.name.trim()) return
-  error.value = null // Clear previous errors
-  
+async function addActivity() {
   try {
     const response = await axios.post('/api/activities', {
-      name: newActivity.value.name.trim(),
+      name: newActivity.value.name,
       person_id: newActivity.value.person_id,
+      day_of_week: newActivity.value.day_of_week,
       start_time: newActivity.value.start_time,
-      end_time: newActivity.value.end_time,
-      day_of_week: newActivity.value.day_of_week
+      end_time: newActivity.value.end_time
     })
-    activities.value.push(response.data)
     
-    // Reset form
+    activities.value.push(response.data.data)
+    showAddForm.value = false
     newActivity.value = {
       name: '',
       person_id: '',
       day_of_week: '',
-      start_time: '17:00',  // Set default start time to 17:00
-      end_time: '18:00'     // Set default end time to 18:00
+      start_time: '',
+      end_time: ''
     }
-    showAddForm.value = false
+    error.value = ''
   } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else if (err.response?.data?.errors) {
-      error.value = Object.values(err.response.data.errors).flat().join('\n')
-    } else {
-      error.value = 'Failed to add activity'
-    }
+    error.value = err.response?.data?.message || 'Failed to add activity'
+    console.error('Error adding activity:', err)
   }
 }
 
-const deleteActivity = async (activity) => {
-  if (!confirm('Are you sure you want to delete this activity?')) return
-  error.value = null // Clear previous errors
-
+async function deleteActivity(activity) {
+  if (!confirm(`Are you sure you want to delete "${activity.name}"?`)) return
+  
   try {
     await axios.delete(`/api/activities/${activity.id}`)
-    activities.value = activities.value.filter(a => a.id !== activity.id)
-  } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else {
-      error.value = 'Failed to delete activity'
+    const index = activities.value.indexOf(activity)
+    if (index > -1) {
+      activities.value.splice(index, 1)
     }
+    error.value = ''
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to delete activity'
+    console.error('Error deleting activity:', err)
+  }
+}
+
+async function updateActivity() {
+  if (!editingActivity.value) return
+  
+  try {
+    const response = await axios.patch(`/api/activities/${editingActivity.value.id}`, {
+      name: editingActivity.value.name,
+      person_id: editingActivity.value.person_id,
+      day_of_week: editingActivity.value.day_of_week,
+      start_time: editingActivity.value.start_time,
+      end_time: editingActivity.value.end_time
+    })
+    
+    const index = activities.value.findIndex(a => a.id === editingActivity.value.id)
+    if (index > -1) {
+      activities.value[index] = response.data.data
+    }
+    
+    editingActivity.value = null
+    error.value = ''
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to update activity'
+    console.error('Error updating activity:', err)
   }
 }
 
@@ -421,37 +436,6 @@ const startEdit = (activity) => {
 const cancelEdit = () => {
   editingActivity.value = null
   error.value = null
-}
-
-const updateActivity = async () => {
-  if (!editingActivity.value) return
-  error.value = null // Clear previous errors
-
-  try {
-    const response = await axios.put(`/api/activities/${editingActivity.value.id}`, {
-      name: editingActivity.value.name.trim(),
-      person_id: editingActivity.value.person_id,
-      start_time: editingActivity.value.start_time,
-      end_time: editingActivity.value.end_time,
-      day_of_week: editingActivity.value.day_of_week
-    })
-    
-    const index = activities.value.findIndex(a => a.id === editingActivity.value.id)
-    if (index !== -1) {
-      activities.value[index] = response.data
-    }
-    
-    editingActivity.value = null
-  } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else if (err.response?.data?.errors) {
-      error.value = Object.values(err.response.data.errors).flat().join('\n')
-    } else {
-      error.value = 'Failed to update activity'
-    }
-    console.error('Update error:', err.response?.data)
-  }
 }
 
 onMounted(() => {

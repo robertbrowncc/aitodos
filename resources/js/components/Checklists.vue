@@ -123,9 +123,9 @@ export default {
     async fetchChecklists() {
       try {
         const response = await axios.get('/api/checklists')
-        this.checklists = response.data
+        this.checklists = response.data.data
       } catch (error) {
-        this.$emit('error', 'Failed to load checklists')
+        this.$emit('error', error.response?.data?.message || 'Failed to load checklists')
       }
     },
     async createChecklist() {
@@ -136,12 +136,12 @@ export default {
           name: this.newChecklistName.trim(),
           description: this.newChecklistDescription
         })
-        this.checklists.push(response.data)
+        this.checklists.push(response.data.data)
         this.newChecklistName = ''
         this.newChecklistDescription = ''
         this.showNewChecklistForm = false
       } catch (error) {
-        this.$emit('error', 'Failed to create checklist')
+        this.$emit('error', error.response?.data?.message || 'Failed to create checklist')
       }
     },
     async deleteChecklist(checklist) {
@@ -156,7 +156,7 @@ export default {
         }
         this.expandedChecklists.delete(checklist.id)
       } catch (error) {
-        this.$emit('error', 'Failed to delete checklist')
+        this.$emit('error', error.response?.data?.message || 'Failed to delete checklist')
       }
     },
     toggleChecklist(checklistId) {
