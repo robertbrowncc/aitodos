@@ -39,16 +39,11 @@
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Person</label>
-            <select
+            <PersonAutocomplete
               v-model="newActivity.person_id"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select a person</option>
-              <option v-for="person in people" :key="person.id" :value="person.id">
-                {{ person.name }}
-              </option>
-            </select>
+              :people="people"
+              class="mt-1"
+            />
           </div>
           
           <div>
@@ -121,16 +116,11 @@
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Person</label>
-            <select
+            <PersonAutocomplete
               v-model="editingActivity.person_id"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select a person</option>
-              <option v-for="person in people" :key="person.id" :value="person.id">
-                {{ person.name }}
-              </option>
-            </select>
+              :people="people"
+              class="mt-1"
+            />
           </div>
           
           <div>
@@ -245,6 +235,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
+import PersonAutocomplete from './PersonAutocomplete.vue'
 
 const activities = ref([])
 const people = ref([])
@@ -428,6 +419,7 @@ const startEdit = (activity) => {
   // Create a deep copy of the activity and ensure time values are in HH:mm format
   editingActivity.value = {
     ...activity,
+    person_id: activity.person?.id || null,  // Explicitly set person_id from the person relationship
     start_time: activity.start_time.substring(0, 5), // Get only HH:mm part
     end_time: activity.end_time.substring(0, 5), // Get only HH:mm part
   }
