@@ -20,6 +20,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import config from '../config';
 
 const weather = ref(null);
 
@@ -48,11 +49,11 @@ const getWeatherEmoji = (condition) => {
 
 const fetchWeather = async () => {
   try {
-    const response = await axios.get('https://cors-anywhere.herokuapp.com/https://api.openweathermap.org/data/2.5/weather', {
+    const response = await axios.get(`${config.weather.corsProxy}/${config.weather.apiUrl}`, {
       params: {
-        q: 'Aarschot,BE',
+        q: config.weather.location,
         units: 'metric',
-        appid: '76f2a3a391e40221acb7c904fe3fc821'
+        appid: config.weather.apiKey
       }
     });
     weather.value = response.data;

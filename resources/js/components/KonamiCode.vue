@@ -71,42 +71,8 @@ const removeMessage = (messageDiv) => {
 const triggerEasterEgg = async () => {
   let messageDiv = null;
   try {
-    // Create a fun animation effect
-    document.body.style.transition = 'all 1s';
-    document.body.style.transform = 'rotate(360deg)';
-    
-    // Add some sparkles or confetti effect
-    const emojis = ['✨', '🌟', '⭐', '💫', '🎉'];
-    const emojiElements = [];
-    
-    for (let i = 0; i < 20; i++) {
-      const emoji = document.createElement('div');
-      emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      emoji.style.position = 'fixed';
-      emoji.style.left = Math.random() * 100 + 'vw';
-      emoji.style.top = Math.random() * 100 + 'vh';
-      emoji.style.animation = 'fall 3s forwards';
-      document.body.appendChild(emoji);
-      emojiElements.push(emoji);
-    }
-
-    // Reset the rotation after animation
-    setTimeout(() => {
-      document.body.style.transform = 'none';
-    }, 1000);
-
-    // Clean up emojis after animation
-    setTimeout(() => {
-      emojiElements.forEach(emoji => {
-        if (document.body.contains(emoji)) {
-          document.body.removeChild(emoji);
-        }
-      });
-    }, 3000);
-
     // Show loading message
     messageDiv = showMessage('🎮 Resetting Database... 🎮');
-
     await resetDatabase();
   } catch (error) {
     emit('error', 'Failed to trigger easter egg: ' + error.message);
@@ -169,14 +135,4 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-@keyframes fall {
-  0% {
-    transform: translateY(-100vh) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
-}
 </style>
