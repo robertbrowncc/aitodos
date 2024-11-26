@@ -22,8 +22,9 @@ class TodoController extends Controller
             $query->select('id', 'name', 'first_name', 'last_name');
         }])->latest()->get();
 
-        return $this->success(
-            TodoResource::collection($todos)->response()->getData()->data
+        return $this->resourceCollectionResponse(
+            TodoResource::collection($todos),
+            'Todos retrieved successfully'
         );
     }
 
@@ -31,8 +32,8 @@ class TodoController extends Controller
     {
         $todo = Todo::create($request->validated());
 
-        return $this->success(
-            (new TodoResource($todo->load('person')))->response()->getData()->data,
+        return $this->resourceResponse(
+            new TodoResource($todo->load('person')),
             'Todo created successfully',
             201
         );
@@ -42,8 +43,8 @@ class TodoController extends Controller
     {
         $todo->update($request->validated());
 
-        return $this->success(
-            (new TodoResource($todo->load('person')))->response()->getData()->data,
+        return $this->resourceResponse(
+            new TodoResource($todo->load('person')),
             'Todo updated successfully'
         );
     }
@@ -51,7 +52,10 @@ class TodoController extends Controller
     public function destroy(Todo $todo): JsonResponse
     {
         $todo->delete();
-        return response()->noContent();
+        return $this->successResponse(
+            null,
+            'Todo deleted successfully'
+        );
     }
 
     public function getPeople(): JsonResponse

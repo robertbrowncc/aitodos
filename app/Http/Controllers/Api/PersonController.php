@@ -14,25 +14,40 @@ class PersonController extends Controller
 {
     use ApiResponse;
 
-    public function index()
+    public function index(): JsonResponse
     {
-        return $this->success(Person::latest()->get());
+        $people = Person::latest()->get();
+        return $this->resourceCollectionResponse(
+            PersonResource::collection($people),
+            'People retrieved successfully'
+        );
     }
 
-    public function store(StorePersonRequest $request)
+    public function store(StorePersonRequest $request): JsonResponse
     {
-        return $this->success(Person::create($request->validated()));
+        $person = Person::create($request->validated());
+        return $this->resourceResponse(
+            new PersonResource($person),
+            'Person created successfully',
+            201
+        );
     }
 
-    public function show(Person $person)
+    public function show(Person $person): JsonResponse
     {
-        return $this->success($person);
+        return $this->resourceResponse(
+            new PersonResource($person),
+            'Person retrieved successfully'
+        );
     }
 
-    public function update(UpdatePersonRequest $request, Person $person)
+    public function update(UpdatePersonRequest $request, Person $person): JsonResponse
     {
         $person->update($request->validated());
-        return $this->success($person);
+        return $this->resourceResponse(
+            new PersonResource($person),
+            'Person updated successfully'
+        );
     }
 
     public function destroy(Person $person)
