@@ -243,7 +243,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
 
 const activities = ref([])
@@ -260,9 +260,36 @@ const daysOfWeek = [
 const newActivity = ref({
   name: '',
   person_id: '',
-  start_time: '',
-  end_time: '',
-  day_of_week: ''
+  day_of_week: '',
+  start_time: '17:00',  // Set default start time to 17:00
+  end_time: '18:00'     // Set default end time to 18:00
+})
+
+// Function to calculate end time based on start time
+const updateEndTime = (startTime) => {
+  if (!startTime) return
+  
+  const [hours, minutes] = startTime.split(':')
+  const date = new Date()
+  date.setHours(parseInt(hours))
+  date.setMinutes(parseInt(minutes))
+  date.setHours(date.getHours() + 1)
+  
+  const newHours = String(date.getHours()).padStart(2, '0')
+  const newMinutes = String(date.getMinutes()).padStart(2, '0')
+  return `${newHours}:${newMinutes}`
+}
+
+// Watch for changes to start time
+watch(() => newActivity.value.start_time, (newTime) => {
+  newActivity.value.end_time = updateEndTime(newTime)
+})
+
+// Also watch editing activity start time
+watch(() => editingActivity.value?.start_time, (newTime) => {
+  if (editingActivity.value && newTime) {
+    editingActivity.value.end_time = updateEndTime(newTime)
+  }
 })
 
 const groupedActivities = computed(() => {
@@ -321,9 +348,9 @@ const addActivity = async () => {
     newActivity.value = {
       name: '',
       person_id: '',
-      start_time: '',
-      end_time: '',
-      day_of_week: ''
+      day_of_week: '',
+      start_time: '17:00',  // Set default start time to 17:00
+      end_time: '18:00'     // Set default end time to 18:00
     }
     showAddForm.value = false
   } catch (err) {

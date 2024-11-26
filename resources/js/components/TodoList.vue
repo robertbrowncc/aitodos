@@ -49,16 +49,11 @@
         </div>
         <div>
           <label for="personId" class="block text-sm font-medium text-blue-800">Assign To (Optional)</label>
-          <select
-            id="personId"
+          <PersonAutocomplete
             v-model="newTodo.person_id"
-            class="mt-1 block w-full rounded-lg border-blue-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          >
-            <option :value="null">Select a person</option>
-            <option v-for="person in people" :key="person.id" :value="person.id">
-              {{ person.name }}
-            </option>
-          </select>
+            :people="people"
+            placeholder="Search for a person..."
+          />
         </div>
         <button 
           type="submit" 
@@ -96,29 +91,22 @@
                 {{ todo.url }}
               </a>
               <div v-if="todo.person" class="text-sm text-gray-600">
-                Assigned to: {{ todo.person.name }}
-                <select
+                Assigned to:
+                <PersonAutocomplete
                   v-model="todo.person_id"
-                  @change="updateAssignment(todo)"
-                  class="ml-2 text-sm border-gray-300 rounded-md"
-                >
-                  <option :value="null">Unassign</option>
-                  <option v-for="person in people" :key="person.id" :value="person.id">
-                    {{ person.name }}
-                  </option>
-                </select>
+                  :people="people"
+                  @update:modelValue="updateAssignment(todo)"
+                  class="inline-block min-w-[200px]"
+                />
               </div>
               <div v-else class="text-sm text-gray-600">
-                <select
+                <PersonAutocomplete
                   v-model="todo.person_id"
-                  @change="updateAssignment(todo)"
-                  class="text-sm border-gray-300 rounded-md"
-                >
-                  <option :value="null">Assign to someone</option>
-                  <option v-for="person in people" :key="person.id" :value="person.id">
-                    {{ person.name }}
-                  </option>
-                </select>
+                  :people="people"
+                  @update:modelValue="updateAssignment(todo)"
+                  placeholder="Assign to someone..."
+                  class="inline-block min-w-[200px]"
+                />
               </div>
             </div>
           </div>
@@ -139,6 +127,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import PersonAutocomplete from './PersonAutocomplete.vue'
 
 const todos = ref([])
 const people = ref([])
