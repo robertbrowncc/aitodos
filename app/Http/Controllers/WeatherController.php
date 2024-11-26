@@ -13,6 +13,21 @@ class WeatherController extends Controller
     {
         $apiKey = config('services.openweather.key');
         $location = config('services.openweather.location');
+        
+        // Log configuration values (excluding API key)
+        Log::info('Weather API request', [
+            'location' => $location,
+            'has_api_key' => !empty($apiKey)
+        ]);
+        
+        if (empty($apiKey) || empty($location)) {
+            Log::error('Missing weather configuration', [
+                'has_api_key' => !empty($apiKey),
+                'has_location' => !empty($location)
+            ]);
+            return response()->json(['error' => 'Weather service not configured'], 503);
+        }
+        
         $cacheKey = "weather_{$location}";
         
         // Try to get weather data from cache
@@ -27,26 +42,40 @@ class WeatherController extends Controller
                 if (!$response->successful()) {
                     Log::error('OpenWeather API error', [
                         'status' => $response->status(),
-                        'response' => $response->json()
+                        'response' => $response->json(),
+                        'location' => $location
                     ]);
-                    return response()->json(['error' => 'Weather service unavailable'], 503);
+                    return response()->json([
+                        'error' => 'Weather service unavailable',
+                        'status' => $response->status()
+                    ], 503);
                 }
                 
                 $data = $response->json();
                 
                 // Validate the response data
                 if (!isset($data['weather'][0]) || !isset($data['main']) || !isset($data['name'])) {
-                    Log::error('Invalid weather data received', ['data' => $data]);
-                    return response()->json(['error' => 'Invalid weather data'], 500);
+                    Log::error('Invalid weather data received', [
+                        'data' => $data,
+                        'location' => $location
+                    ]);
+                    return response()->json([
+                        'error' => 'Invalid weather data',
+                        'data_received' => $data
+                    ], 500);
                 }
                 
                 return $data;
             } catch (\Exception $e) {
                 Log::error('Failed to fetch weather data', [
                     'error' => $e->getMessage(),
-                    'location' => $location
+                    'location' => $location,
+                    'trace' => $e->getTraceAsString()
                 ]);
-                return response()->json(['error' => 'Failed to fetch weather data'], 500);
+                return response()->json([
+                    'error' => 'Failed to fetch weather data',
+                    'message' => $e->getMessage()
+                ], 500);
             }
         });
     }

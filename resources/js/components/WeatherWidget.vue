@@ -74,6 +74,7 @@ const fetchWeather = async () => {
   } catch (error) {
     error.value = 'Failed to load weather data';
     console.error('Error fetching weather data:', error);
+    weather.value = null;
   }
 };
 
