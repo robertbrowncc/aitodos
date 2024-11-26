@@ -176,7 +176,7 @@ export default {
       
       // Update order on server
       try {
-        const response = await axios.post(`/api/checklists/${this.checklist.id}/reorder`, {
+        const response = await axios.post(`/api/checklists/${this.checklist.id}/items/reorder`, {
           order: this.items.map(item => item.id)
         })
         // Update items with server response to ensure consistency

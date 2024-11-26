@@ -30,14 +30,20 @@ class ChecklistController extends Controller
         ]);
 
         $checklist = Checklist::create($validated);
-        return $this->successResponse($checklist->load(['person', 'items']));
+        return $this->successResponse(
+            $checklist->load(['person', 'items']),
+            'Checklist created successfully',
+            201
+        );
     }
 
     public function show(Checklist $checklist)
     {
-        return $this->successResponse($checklist->load(['person', 'items' => function ($query) {
-            $query->orderBy('order');
-        }]));
+        return $this->successResponse(
+            $checklist->load(['person', 'items' => function ($query) {
+                $query->orderBy('order');
+            }])
+        );
     }
 
     public function update(Request $request, Checklist $checklist)
@@ -49,12 +55,18 @@ class ChecklistController extends Controller
         ]);
 
         $checklist->update($validated);
-        return $this->successResponse($checklist->load(['person', 'items']));
+        return $this->successResponse(
+            $checklist->fresh()->load(['person', 'items']),
+            'Checklist updated successfully'
+        );
     }
 
     public function destroy(Checklist $checklist)
     {
         $checklist->delete();
-        return $this->successResponse(null, 'Checklist deleted successfully');
+        return $this->successResponse(
+            null,
+            'Checklist deleted successfully'
+        );
     }
 }

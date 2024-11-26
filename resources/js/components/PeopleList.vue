@@ -252,7 +252,15 @@ async function addPerson() {
 }
 
 async function startEdit(person) {
-  editingPerson.value = { ...person }
+  // Create a deep copy of the person object with all fields
+  editingPerson.value = {
+    id: person.id,
+    name: person.name || '',
+    email: person.email || '',
+    phone: person.phone || '',
+    date_of_birth: person.date_of_birth || '',
+    address: person.address || ''
+  }
   originalName.value = person.name
 }
 
@@ -264,10 +272,20 @@ async function updatePerson() {
   if (!editingPerson.value) return
 
   try {
-    const response = await axios.patch(`/api/people/${editingPerson.value.id}`, editingPerson.value)
-    if (response.data?.status === 'success' && response.data?.data) {
+    // Create update payload with all fields
+    const updateData = {
+      name: editingPerson.value.name,
+      email: editingPerson.value.email,
+      phone: editingPerson.value.phone,
+      date_of_birth: editingPerson.value.date_of_birth,
+      address: editingPerson.value.address
+    }
+
+    const response = await axios.patch(`/api/people/${editingPerson.value.id}`, updateData)
+    if (response.data?.data) {
       const index = people.value.findIndex(p => p.id === editingPerson.value.id)
       if (index !== -1) {
+        // Replace the entire person object with the response data
         people.value[index] = response.data.data
       }
       editingPerson.value = null
