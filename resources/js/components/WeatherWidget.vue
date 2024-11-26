@@ -20,7 +20,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import config from '../config';
 
 const weather = ref(null);
 
@@ -49,17 +48,7 @@ const getWeatherEmoji = (condition) => {
 
 const fetchWeather = async () => {
   try {
-    const baseUrl = config.weather.corsProxy 
-      ? `${config.weather.corsProxy}/${config.weather.apiUrl}`
-      : config.weather.apiUrl;
-      
-    const response = await axios.get(baseUrl, {
-      params: {
-        q: config.weather.location,
-        units: 'metric',
-        appid: config.weather.apiKey
-      }
-    });
+    const response = await axios.get('/api/weather');
     weather.value = response.data;
   } catch (error) {
     console.error('Error fetching weather data:', error);

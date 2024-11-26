@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\WeatherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,3 +36,5 @@ Route::apiResource('activities', ActivityController::class);
 
 // Konami code endpoint
 Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);
+
+Route::get('/weather', [WeatherController::class, 'getWeather']);
