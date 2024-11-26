@@ -25,6 +25,7 @@ Route::middleware('api')->group(function () {
     // Resource routes
     Route::apiResource('todos', TodoController::class);
     Route::apiResource('people', PersonController::class);
+    Route::get('people/upcoming/birthdays', [PersonController::class, 'upcomingBirthdays']);
     Route::apiResource('checklists', ChecklistController::class);
 
     // Nested routes for checklist items

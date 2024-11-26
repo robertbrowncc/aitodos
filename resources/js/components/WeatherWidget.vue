@@ -1,5 +1,5 @@
 <template>
-  <div class="weather-widget mt-8 border-t pt-8">
+  <div class="p-4 bg-blue-50 rounded-xl h-full">
     <div v-if="error" class="text-red-500">
       <p>{{ error }}</p>
       <button 
@@ -11,17 +11,31 @@
       </button>
     </div>
     <div v-else-if="weather && weather.weather && weather.weather[0]">
-      <h3 class="text-xl font-semibold mb-4 text-gray-700">
-        Current Weather in {{ weather.name }} {{ getWeatherEmoji(weather.weather[0].description) }}
+      <h3 class="text-lg font-semibold text-blue-700 mb-3">
+        🌡️ Current Weather
       </h3>
       <div class="space-y-2">
-        <p class="text-lg"><span class="font-medium">Temperature:</span> {{ Math.round(weather.main.temp) }}°C</p>
-        <p class="text-lg"><span class="font-medium">Feels like:</span> {{ Math.round(weather.main.feels_like) }}°C</p>
-        <p class="text-lg capitalize"><span class="font-medium">Condition:</span> {{ weather.weather[0].description }}</p>
-        <p class="text-lg"><span class="font-medium">Humidity:</span> {{ weather.main.humidity }}%</p>
+        <div class="flex items-center justify-between p-2 bg-white rounded-lg shadow-sm">
+          <span class="font-medium text-gray-700">{{ weather.name }}</span>
+          <span class="text-sm text-blue-600">
+            {{ getWeatherEmoji(weather.weather[0].description) }} {{ Math.round(weather.main.temp) }}°C
+          </span>
+        </div>
+        <div class="flex items-center justify-between p-2 bg-white rounded-lg shadow-sm">
+          <span class="font-medium text-gray-700">Feels Like</span>
+          <span class="text-sm text-blue-600">{{ Math.round(weather.main.feels_like) }}°C</span>
+        </div>
+        <div class="flex items-center justify-between p-2 bg-white rounded-lg shadow-sm">
+          <span class="font-medium text-gray-700">Condition</span>
+          <span class="text-sm text-blue-600 capitalize">{{ weather.weather[0].description }}</span>
+        </div>
+        <div class="flex items-center justify-between p-2 bg-white rounded-lg shadow-sm">
+          <span class="font-medium text-gray-700">Humidity</span>
+          <span class="text-sm text-blue-600">{{ weather.main.humidity }}%</span>
+        </div>
       </div>
     </div>
-    <div v-else>
+    <div v-else class="flex items-center justify-center h-full">
       <p class="text-gray-500">Loading weather data...</p>
     </div>
   </div>

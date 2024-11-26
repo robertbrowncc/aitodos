@@ -15,10 +15,7 @@ class WeatherController extends Controller
 
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
-            $request->headers->set('Accept', 'application/json');
-            return $next($request);
-        });
+        // No need for middleware here as we're already checking wantsJson() in the method
     }
 
     public function getWeather(Request $request)

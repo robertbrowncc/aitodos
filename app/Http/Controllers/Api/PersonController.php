@@ -9,6 +9,7 @@ use App\Http\Resources\PersonResource;
 use App\Models\Person;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\Traits\ApiResponse;
+use Carbon\Carbon;
 
 class PersonController extends Controller
 {
@@ -54,5 +55,38 @@ class PersonController extends Controller
     {
         $person->delete();
         return response()->noContent();
+    }
+
+    public function upcomingBirthdays(): JsonResponse
+    {
+        $today = Carbon::today();
+        
+        // Get all people with birthdays
+        $people = Person::whereNotNull('date_of_birth')
+            ->get()
+            ->map(function ($person) use ($today) {
+                // Get this year's birthday
+                $birthday = Carbon::parse($person->date_of_birth)->setYear($today->year);
+                
+                // If birthday has passed this year, look at next year's birthday
+                if ($birthday->isPast()) {
+                    $birthday->addYear();
+                }
+                
+                return [
+                    'person' => $person,
+                    'days_until' => $today->diffInDays($birthday, false)
+                ];
+            })
+            ->filter(function ($item) {
+                return $item['days_until'] >= 0;
+            })
+            ->sortBy('days_until')
+            ->take(4);
+
+        return $this->resourceResponse(
+            PersonResource::collection($people->pluck('person')),
+            'Upcoming birthdays retrieved successfully'
+        );
     }
 }
