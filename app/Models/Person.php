@@ -29,10 +29,6 @@ class Person extends Model
      * @var array
      */
     protected $hidden = [
-        'email',
-        'phone',
-        'date_of_birth',
-        'address',
         'created_at',
         'updated_at'
     ];

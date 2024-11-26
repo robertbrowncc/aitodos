@@ -15,9 +15,8 @@ class StoreChecklistItemRequest extends FormRequest
     {
         return [
             'content' => ['required', 'string', 'max:255'],
-            'completed' => ['boolean'],
-            'order' => ['integer'],
-            'checklist_id' => ['required', 'exists:checklists,id'],
+            'completed' => ['boolean', 'nullable'],
+            'order' => ['integer', 'nullable'],
         ];
     }
 }

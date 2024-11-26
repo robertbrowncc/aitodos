@@ -9,7 +9,7 @@ use App\Http\Resources\TodoResource;
 use App\Http\Resources\PersonResource;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
-use App\Http\Controllers\Api\Traits\ApiResponse;
+use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
 class TodoController extends Controller
@@ -22,9 +22,8 @@ class TodoController extends Controller
             $query->select('id', 'name', 'first_name', 'last_name');
         }])->latest()->get();
 
-        return $this->resourceCollectionResponse(
-            TodoResource::collection($todos),
-            'Todos retrieved successfully'
+        return $this->success(
+            TodoResource::collection($todos)->response()->getData()->data
         );
     }
 
@@ -32,8 +31,8 @@ class TodoController extends Controller
     {
         $todo = Todo::create($request->validated());
 
-        return $this->resourceResponse(
-            new TodoResource($todo->load('person')),
+        return $this->success(
+            (new TodoResource($todo->load('person')))->response()->getData()->data,
             'Todo created successfully',
             201
         );
@@ -43,8 +42,8 @@ class TodoController extends Controller
     {
         $todo->update($request->validated());
 
-        return $this->resourceResponse(
-            new TodoResource($todo->load('person')),
+        return $this->success(
+            (new TodoResource($todo->load('person')))->response()->getData()->data,
             'Todo updated successfully'
         );
     }
@@ -52,7 +51,7 @@ class TodoController extends Controller
     public function destroy(Todo $todo): JsonResponse
     {
         $todo->delete();
-        return $this->noContentResponse();
+        return response()->noContent();
     }
 
     public function getPeople(): JsonResponse

@@ -214,7 +214,12 @@ const sortedPeople = computed(() => {
 async function fetchPeople() {
   try {
     const response = await axios.get('/api/people')
-    people.value = response.data.data
+    if (response.data?.status === 'success' && response.data?.data) {
+      people.value = response.data.data
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      people.value = Array.isArray(response.data) ? response.data : []
+    }
     error.value = null
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load people'
@@ -225,16 +230,21 @@ async function fetchPeople() {
 async function addPerson() {
   try {
     const response = await axios.post('/api/people', newPerson.value)
-    people.value.push(response.data.data)
-    newPerson.value = {
-      name: '',
-      email: '',
-      phone: '',
-      date_of_birth: '',
-      address: ''
+    if (response.data?.status === 'success' && response.data?.data) {
+      people.value.push(response.data.data)
+      newPerson.value = {
+        name: '',
+        email: '',
+        phone: '',
+        date_of_birth: '',
+        address: ''
+      }
+      showAddForm.value = false
+      error.value = null
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to create person: unexpected response format'
     }
-    showAddForm.value = false
-    error.value = null
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to create person'
     console.error('Error adding person:', err)
@@ -255,12 +265,17 @@ async function updatePerson() {
 
   try {
     const response = await axios.patch(`/api/people/${editingPerson.value.id}`, editingPerson.value)
-    const index = people.value.findIndex(p => p.id === editingPerson.value.id)
-    if (index !== -1) {
-      people.value[index] = response.data.data
+    if (response.data?.status === 'success' && response.data?.data) {
+      const index = people.value.findIndex(p => p.id === editingPerson.value.id)
+      if (index !== -1) {
+        people.value[index] = response.data.data
+      }
+      editingPerson.value = null
+      error.value = null
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to update person: unexpected response format'
     }
-    editingPerson.value = null
-    error.value = null
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to update person'
     console.error('Error updating person:', err)

@@ -6,14 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Checklist;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Api\Traits\ApiResponse;
 
 class ChecklistController extends Controller
 {
+    use ApiResponse;
+
     public function index()
     {
-        return Checklist::with(['person', 'items' => function ($query) {
+        $checklists = Checklist::with(['person', 'items' => function ($query) {
             $query->orderBy('order');
         }])->latest()->get();
+        
+        return $this->successResponse($checklists);
     }
 
     public function store(Request $request)
@@ -25,14 +30,14 @@ class ChecklistController extends Controller
         ]);
 
         $checklist = Checklist::create($validated);
-        return $checklist->load(['person', 'items']);
+        return $this->successResponse($checklist->load(['person', 'items']));
     }
 
     public function show(Checklist $checklist)
     {
-        return $checklist->load(['person', 'items' => function ($query) {
+        return $this->successResponse($checklist->load(['person', 'items' => function ($query) {
             $query->orderBy('order');
-        }]);
+        }]));
     }
 
     public function update(Request $request, Checklist $checklist)
@@ -44,12 +49,12 @@ class ChecklistController extends Controller
         ]);
 
         $checklist->update($validated);
-        return $checklist->load(['person', 'items']);
+        return $this->successResponse($checklist->load(['person', 'items']));
     }
 
     public function destroy(Checklist $checklist)
     {
         $checklist->delete();
-        return response()->noContent();
+        return $this->successResponse(null, 'Checklist deleted successfully');
     }
 }

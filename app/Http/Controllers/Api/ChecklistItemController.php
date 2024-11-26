@@ -28,13 +28,15 @@ class ChecklistItemController extends Controller
     public function store(StoreChecklistItemRequest $request, Checklist $checklist)
     {
         $validated = $request->validated();
-
+        
         // Get the highest order number and add 1
         $maxOrder = $checklist->items()->max('order') ?? -1;
         $validated['order'] = $maxOrder + 1;
         $validated['checklist_id'] = $checklist->id;
+        $validated['completed'] = $validated['completed'] ?? false;
 
         $item = ChecklistItem::create($validated);
+        
         return $this->successResponse(
             new ChecklistItemResource($item),
             'Checklist item created successfully',
@@ -51,6 +53,7 @@ class ChecklistItemController extends Controller
         }
 
         $item->update($validated);
+        
         return $this->successResponse(
             new ChecklistItemResource($item),
             'Checklist item updated successfully'
@@ -59,6 +62,10 @@ class ChecklistItemController extends Controller
 
     public function destroy(Checklist $checklist, ChecklistItem $item)
     {
+        if ($item->checklist_id !== $checklist->id) {
+            return $this->errorResponse('This item does not belong to the specified checklist', 403);
+        }
+
         $oldOrder = $item->order;
         $item->delete();
 
@@ -69,8 +76,7 @@ class ChecklistItemController extends Controller
 
         return $this->successResponse(
             null,
-            'Checklist item deleted successfully',
-            204
+            'Checklist item deleted successfully'
         );
     }
 
@@ -102,46 +108,36 @@ class ChecklistItemController extends Controller
                 }
             });
 
-            // Return the updated items
             $items = $checklist->items()->orderBy('order')->get();
             return $this->successResponse(
                 ChecklistItemResource::collection($items),
                 'Items reordered successfully'
             );
-
         } catch (\Exception $e) {
             return $this->errorResponse(
-                'Failed to update item order',
+                'Failed to reorder items',
                 500
             );
         }
     }
 
-    protected function reorderItems(Checklist $checklist, ChecklistItem $item, int $newOrder)
+    private function reorderItems(Checklist $checklist, ChecklistItem $item, int $newOrder)
     {
         $oldOrder = $item->order;
-        
         if ($oldOrder === $newOrder) {
             return;
         }
 
-        if ($oldOrder < $newOrder) {
-            // Moving down: decrement items in between
+        if ($newOrder > $oldOrder) {
+            // Moving down: decrease order of items in between
             $checklist->items()
-                ->where('order', '>', $oldOrder)
-                ->where('order', '<=', $newOrder)
-                ->where('id', '!=', $item->id)
+                ->whereBetween('order', [$oldOrder + 1, $newOrder])
                 ->update(['order' => DB::raw('`order` - 1')]);
         } else {
-            // Moving up: increment items in between
+            // Moving up: increase order of items in between
             $checklist->items()
-                ->where('order', '>=', $newOrder)
-                ->where('order', '<', $oldOrder)
-                ->where('id', '!=', $item->id)
+                ->whereBetween('order', [$newOrder, $oldOrder - 1])
                 ->update(['order' => DB::raw('`order` + 1')]);
         }
-
-        $item->order = $newOrder;
-        $item->save();
     }
 }

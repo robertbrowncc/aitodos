@@ -57,6 +57,9 @@
         </button>
       </div>
     </TransitionGroup>
+    <div v-if="error" class="text-red-600 text-center py-4">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -68,31 +71,55 @@ export default {
   props: {
     checklist: {
       type: Object,
-      required: true
+      required: true,
+      validator: function(value) {
+        return value && typeof value.id !== 'undefined'
+      }
     }
   },
   data() {
     return {
       newItemContent: '',
       items: [],
-      draggedItem: null
+      draggedItem: null,
+      error: null
     }
+  },
+  errorCaptured(err, vm, info) {
+    console.error('Error captured in ChecklistItems:', err, info)
+    this.error = err.message || 'An unexpected error occurred'
+    return false // prevent error from propagating
   },
   watch: {
     'checklist.id': {
       immediate: true,
-      handler() {
-        this.fetchItems()
+      async handler(newId) {
+        if (newId) {
+          await this.fetchItems()
+        } else {
+          this.items = []
+        }
       }
     }
   },
   methods: {
     async fetchItems() {
+      if (!this.checklist?.id) {
+        this.items = []
+        return
+      }
+
       try {
         const response = await axios.get(`/api/checklists/${this.checklist.id}/items`)
+        if (!response.data || !Array.isArray(response.data.data)) {
+          throw new Error('Invalid response format')
+        }
         this.items = response.data.data
+        this.error = null
       } catch (error) {
-        this.$emit('error', error.response?.data?.message || 'Failed to load checklist items')
+        console.error('Error fetching checklist items:', error)
+        this.error = error.response?.data?.message || error.message || 'Failed to load checklist items'
+        this.items = []
       }
     },
     async addItem() {
@@ -100,12 +127,15 @@ export default {
       
       try {
         const response = await axios.post(`/api/checklists/${this.checklist.id}/items`, {
-          content: this.newItemContent
+          content: this.newItemContent.trim(),
+          completed: false
         })
         this.items.push(response.data.data)
         this.newItemContent = ''
+        this.error = null
       } catch (error) {
-        this.$emit('error', error.response?.data?.message || 'Failed to add item')
+        console.error('Error adding item:', error)
+        this.error = error.response?.data?.message || error.message || 'Failed to add item'
       }
     },
     async toggleComplete(item) {

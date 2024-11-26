@@ -22,7 +22,8 @@ const props = defineProps({
   },
   people: {
     type: Array,
-    required: true
+    required: true,
+    default: () => []
   },
   placeholder: {
     type: String,
@@ -34,9 +35,18 @@ const emit = defineEmits(['update:modelValue'])
 
 const selected = ref(null)
 
-// Watch for external changes
+// Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {
-  selected.value = newValue
+  if (props.people?.length) {
+    selected.value = newValue
+  }
+}, { immediate: true })
+
+// Watch for changes in people array
+watch(() => props.people, (newPeople) => {
+  if (newPeople?.length && props.modelValue) {
+    selected.value = props.modelValue
+  }
 }, { immediate: true })
 
 // Emit changes when selection changes

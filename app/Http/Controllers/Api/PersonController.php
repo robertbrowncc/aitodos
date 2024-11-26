@@ -6,29 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonRequest;
 use App\Http\Requests\UpdatePersonRequest;
 use App\Models\Person;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 class PersonController extends Controller
 {
+    use ApiResponse;
+
     public function index()
     {
-        return Person::latest()->get();
+        return $this->success(Person::latest()->get());
     }
 
     public function store(StorePersonRequest $request)
     {
-        return Person::create($request->validated());
+        return $this->success(Person::create($request->validated()));
     }
 
     public function show(Person $person)
     {
-        return $person;
+        return $this->success($person);
     }
 
     public function update(UpdatePersonRequest $request, Person $person)
     {
         $person->update($request->validated());
-        return $person;
+        return $this->success($person);
     }
 
     public function destroy(Person $person)

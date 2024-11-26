@@ -1,5 +1,8 @@
 <template>
   <div class="checklists-container">
+    <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+      <span class="block sm:inline">{{ error }}</span>
+    </div>
     <div class="checklists-header flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold">Checklists</h2>
       <div class="flex space-x-2">
@@ -113,19 +116,31 @@ export default {
       newChecklistName: '',
       newChecklistDescription: '',
       showNewChecklistForm: false,
-      expandedChecklists: new Set() // Track which checklists are expanded
+      expandedChecklists: new Set(), // Track which checklists are expanded
+      error: null
     }
   },
   mounted() {
     this.fetchChecklists()
   },
+  errorCaptured(err, vm, info) {
+    console.error('Error captured in Checklists:', err, info)
+    this.error = err.message || 'An unexpected error occurred'
+    return false // prevent error from propagating
+  },
   methods: {
     async fetchChecklists() {
       try {
         const response = await axios.get('/api/checklists')
+        if (!response.data || !Array.isArray(response.data.data)) {
+          throw new Error('Invalid response format')
+        }
         this.checklists = response.data.data
+        this.error = null
       } catch (error) {
-        this.$emit('error', error.response?.data?.message || 'Failed to load checklists')
+        console.error('Error fetching checklists:', error)
+        this.error = error.response?.data?.message || error.message || 'Failed to load checklists'
+        this.checklists = []
       }
     },
     async createChecklist() {
@@ -141,7 +156,8 @@ export default {
         this.newChecklistDescription = ''
         this.showNewChecklistForm = false
       } catch (error) {
-        this.$emit('error', error.response?.data?.message || 'Failed to create checklist')
+        console.error('Error creating checklist:', error)
+        this.error = error.response?.data?.message || 'Failed to create checklist'
       }
     },
     async deleteChecklist(checklist) {
@@ -156,7 +172,8 @@ export default {
         }
         this.expandedChecklists.delete(checklist.id)
       } catch (error) {
-        this.$emit('error', error.response?.data?.message || 'Failed to delete checklist')
+        console.error('Error deleting checklist:', error)
+        this.error = error.response?.data?.message || 'Failed to delete checklist'
       }
     },
     toggleChecklist(checklistId) {
