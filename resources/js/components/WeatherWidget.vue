@@ -1,6 +1,9 @@
 <template>
   <div class="weather-widget mt-8 border-t pt-8">
-    <div v-if="weather">
+    <div v-if="error" class="text-red-500">
+      <p>{{ error }}</p>
+    </div>
+    <div v-else-if="weather && weather.weather && weather.weather[0]">
       <h3 class="text-xl font-semibold mb-4 text-gray-700">
         Current Weather in {{ weather.name }} {{ getWeatherEmoji(weather.weather[0].description) }}
       </h3>
@@ -22,8 +25,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const weather = ref(null);
+const error = ref(null);
 
 const getWeatherEmoji = (condition) => {
+  if (!condition) return '🌡️';
+  
   const weatherMap = {
     'clear sky': '☀️',
     'few clouds': '🌤️',
@@ -46,11 +52,27 @@ const getWeatherEmoji = (condition) => {
   return weatherMap[condition.toLowerCase()] || '🌡️';
 };
 
+const validateWeatherData = (data) => {
+  if (!data) return false;
+  if (!data.weather || !Array.isArray(data.weather) || data.weather.length === 0) return false;
+  if (!data.main || !data.main.temp || !data.main.feels_like || !data.main.humidity) return false;
+  if (!data.name) return false;
+  return true;
+};
+
 const fetchWeather = async () => {
   try {
+    error.value = null;
     const response = await axios.get('/api/weather');
-    weather.value = response.data;
+    
+    if (validateWeatherData(response.data)) {
+      weather.value = response.data;
+    } else {
+      error.value = 'Invalid weather data received';
+      console.error('Invalid weather data:', response.data);
+    }
   } catch (error) {
+    error.value = 'Failed to load weather data';
     console.error('Error fetching weather data:', error);
   }
 };
