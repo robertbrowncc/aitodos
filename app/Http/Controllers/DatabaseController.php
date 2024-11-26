@@ -19,6 +19,15 @@ class DatabaseController extends Controller
 {
     public function resetDatabase()
     {
+        // Only allow database reset in local environment
+        if (app()->environment() !== 'local') {
+            Log::warning('Attempted database reset in non-local environment');
+            return response()->json(
+                ['error' => 'Database reset is only available in local environment'],
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
         try {
             Log::info('Starting database reset process');
             
@@ -55,7 +64,7 @@ class DatabaseController extends Controller
             
         } catch (\Exception $e) {
             Log::error('Error resetting database: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to reset database'], 500);
+            return response()->json(['error' => 'Failed to reset database'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
