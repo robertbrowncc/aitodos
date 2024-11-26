@@ -1,15 +1,36 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class WeatherController extends Controller
 {
     public function getWeather()
+    {
+        // Apply rate limiting - 60 requests per minute
+        $executed = RateLimiter::attempt(
+            'weather_api',
+            60,
+            function() {
+                return $this->fetchWeatherData();
+            },
+            60
+        );
+
+        if (!$executed) {
+            return response()->json(['error' => 'Too many requests'], 429);
+        }
+
+        return $executed;
+    }
+
+    private function fetchWeatherData()
     {
         $apiKey = config('services.openweather.key');
         $location = config('services.openweather.location');

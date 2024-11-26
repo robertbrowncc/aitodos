@@ -2,6 +2,13 @@
   <div class="weather-widget mt-8 border-t pt-8">
     <div v-if="error" class="text-red-500">
       <p>{{ error }}</p>
+      <button 
+        v-if="canRetry"
+        @click="fetchWeather" 
+        class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        Retry
+      </button>
     </div>
     <div v-else-if="weather && weather.weather && weather.weather[0]">
       <h3 class="text-xl font-semibold mb-4 text-gray-700">
@@ -26,6 +33,7 @@ import axios from 'axios';
 
 const weather = ref(null);
 const error = ref(null);
+const canRetry = ref(true);
 
 const getWeatherEmoji = (condition) => {
   if (!condition) return '🌡️';
@@ -63,6 +71,7 @@ const validateWeatherData = (data) => {
 const fetchWeather = async () => {
   try {
     error.value = null;
+    canRetry.value = true;
     const response = await axios.get('/api/weather');
     
     if (validateWeatherData(response.data)) {
@@ -71,9 +80,17 @@ const fetchWeather = async () => {
       error.value = 'Invalid weather data received';
       console.error('Invalid weather data:', response.data);
     }
-  } catch (error) {
-    error.value = 'Failed to load weather data';
-    console.error('Error fetching weather data:', error);
+  } catch (err) {
+    if (err.response?.status === 429) {
+      error.value = 'Too many requests. Please try again in a minute.';
+      canRetry.value = false;
+      setTimeout(() => {
+        canRetry.value = true;
+      }, 60000);
+    } else {
+      error.value = 'Failed to load weather data';
+      console.error('Error fetching weather data:', err);
+    }
     weather.value = null;
   }
 };

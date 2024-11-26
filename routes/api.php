@@ -7,8 +7,8 @@ use App\Http\Controllers\Api\ChecklistController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\TodoController;
+use App\Http\Controllers\Api\WeatherController;
 use App\Http\Controllers\DatabaseController;
-use App\Http\Controllers\WeatherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,11 +30,13 @@ Route::get('checklists/{checklist}/items', [ChecklistItemController::class, 'ind
 Route::post('checklists/{checklist}/items', [ChecklistItemController::class, 'store']);
 Route::patch('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'update']);
 Route::delete('checklists/{checklist}/items/{item}', [ChecklistItemController::class, 'destroy']);
-Route::post('checklists/{checklist}/reorder', [ChecklistItemController::class, 'reorder']);
 
+// Activities routes
 Route::apiResource('activities', ActivityController::class);
+Route::get('activities/person/{person}', [ActivityController::class, 'getActivitiesForPerson']);
 
-// Konami code endpoint
+// Database reset route (local only)
 Route::post('reset-database', [DatabaseController::class, 'resetDatabase']);
 
-Route::get('/weather', [WeatherController::class, 'getWeather']);
+// Weather route
+Route::get('weather', [WeatherController::class, 'getWeather']);
