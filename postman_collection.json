@@ -321,8 +321,9 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "https://aitodos.test",
-			"type": "string"
+			"value": "{{APP_URL}}",
+			"type": "string",
+			"description": "The base URL for the API, set this in your Postman environment"
 		}
 	]
 }

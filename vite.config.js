@@ -29,7 +29,7 @@ export default defineConfig({
         },
     },
     server: {
-        hmr: { host: 'aitodos.test' },
-        host: 'aitodos.test'
+        hmr: { host: process.env.APP_URL ? new URL(process.env.APP_URL).hostname : 'localhost' },
+        host: process.env.APP_URL ? new URL(process.env.APP_URL).hostname : 'localhost'
     }
 });
