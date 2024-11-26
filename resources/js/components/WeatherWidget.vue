@@ -49,7 +49,11 @@ const getWeatherEmoji = (condition) => {
 
 const fetchWeather = async () => {
   try {
-    const response = await axios.get(`${config.weather.corsProxy}/${config.weather.apiUrl}`, {
+    const baseUrl = config.weather.corsProxy 
+      ? `${config.weather.corsProxy}/${config.weather.apiUrl}`
+      : config.weather.apiUrl;
+      
+    const response = await axios.get(baseUrl, {
       params: {
         q: config.weather.location,
         units: 'metric',

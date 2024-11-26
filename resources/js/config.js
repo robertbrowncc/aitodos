@@ -3,6 +3,6 @@ export default {
         apiKey: import.meta.env.VITE_WEATHER_API_KEY,
         location: import.meta.env.VITE_WEATHER_LOCATION,
         apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
-        corsProxy: 'https://cors-anywhere.herokuapp.com'
+        corsProxy: import.meta.env.VITE_APP_ENV === 'local' ? 'https://cors-anywhere.herokuapp.com' : ''
     }
 };
