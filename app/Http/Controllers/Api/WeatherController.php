@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class WeatherController extends Controller
 {
+    private const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
     public function getWeather()
     {
         // Apply rate limiting - 60 requests per minute
@@ -54,7 +56,9 @@ class WeatherController extends Controller
         // Try to get weather data from cache
         return Cache::remember($cacheKey, 3600, function () use ($apiKey, $location) {
             try {
-                $response = Http::timeout(5)->get('https://api.openweathermap.org/data/2.5/weather', [
+                $response = Http::withOptions([
+                    'verify' => true,
+                ])->timeout(5)->get(self::API_URL, [
                     'q' => $location,
                     'units' => 'metric',
                     'appid' => $apiKey

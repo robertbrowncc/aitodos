@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/app.js'
             ],
             refresh: true,
+            https: true
         }),
         vue({
             template: {
@@ -28,7 +29,7 @@ export default defineConfig({
         },
     },
     server: {
-        https: true,
-        host: true
+        hmr: { host: 'aitodos.test' },
+        host: 'aitodos.test'
     }
 });
