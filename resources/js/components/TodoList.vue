@@ -142,47 +142,43 @@ const newTodo = ref({
 
 async function fetchTodos() {
   try {
-    const response = await axios.get('/api/todos');
+    const response = await axios.get('/api/todos')
     if (response.data?.status === 'success' && response.data?.data) {
-      todos.value = response.data.data.map(todo => ({
-        ...todo,
-        person_id: todo.person_id || null // Ensure person_id is null if not set
-      }));
+      todos.value = response.data.data
+      error.value = ''
     } else {
-      console.warn('Unexpected API response format:', response.data);
-      todos.value = [];
+      console.warn('Unexpected API response format:', response.data)
+      todos.value = []
+      error.value = 'Unexpected response format from server'
     }
-    error.value = '';
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to load todos';
-    console.error('Error fetching todos:', err);
-    todos.value = []; // Reset todos on error
+    error.value = err.response?.data?.message || 'Failed to load todos'
+    console.error('Error fetching todos:', err)
+    todos.value = []
   }
 }
 
 async function addTodo() {
   try {
-    const response = await axios.post('/api/todos', newTodo.value);
+    const response = await axios.post('/api/todos', newTodo.value)
+    
     if (response.data?.status === 'success' && response.data?.data) {
-      todos.value.unshift({
-        ...response.data.data,
-        person_id: response.data.data.person_id || null
-      });
+      todos.value.unshift(response.data.data)
       newTodo.value = {
         name: '',
         url: '',
         person_id: null,
         completed: false
-      };
-      showAddForm.value = false;
-      error.value = '';
+      }
+      showAddForm.value = false
+      error.value = ''
     } else {
-      console.warn('Unexpected API response format:', response.data);
-      error.value = 'Failed to add todo: unexpected response format';
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to add todo: unexpected response format'
     }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to add todo';
-    console.error('Error adding todo:', err);
+    error.value = err.response?.data?.message || 'Failed to add todo'
+    console.error('Error adding todo:', err)
   }
 }
 
@@ -191,34 +187,42 @@ async function toggleTodo(todo) {
     const response = await axios.patch(`/api/todos/${todo.id}`, {
       completed: !todo.completed
     })
-    Object.assign(todo, response.data.data)
-    error.value = ''
+    
+    if (response.data?.status === 'success' && response.data?.data) {
+      const index = todos.value.findIndex(t => t.id === todo.id)
+      if (index !== -1) {
+        todos.value[index] = response.data.data
+      }
+      error.value = ''
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to update todo: unexpected response format'
+    }
   } catch (err) {
-    todo.completed = !todo.completed // Revert the change
     error.value = err.response?.data?.message || 'Failed to update todo'
     console.error('Error updating todo:', err)
   }
 }
 
 async function updateAssignment(todo) {
-  const originalPersonId = todo.person_id;
   try {
     const response = await axios.patch(`/api/todos/${todo.id}`, {
       person_id: todo.person_id
-    });
+    })
+    
     if (response.data?.status === 'success' && response.data?.data) {
-      Object.assign(todo, response.data.data);
+      const index = todos.value.findIndex(t => t.id === todo.id)
+      if (index !== -1) {
+        todos.value[index] = response.data.data
+      }
+      error.value = ''
     } else {
-      console.warn('Unexpected API response format:', response.data);
-      // Revert the change if response format is unexpected
-      todo.person_id = originalPersonId;
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to update assignment: unexpected response format'
     }
-    error.value = '';
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to update assignment';
-    console.error('Error updating assignment:', err);
-    // Revert the change on error
-    todo.person_id = originalPersonId;
+    error.value = err.response?.data?.message || 'Failed to update assignment'
+    console.error('Error updating todo assignment:', err)
   }
 }
 

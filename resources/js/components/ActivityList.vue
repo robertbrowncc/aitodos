@@ -301,21 +301,34 @@ const formatTime = (time) => {
 async function fetchActivities() {
   try {
     const response = await axios.get('/api/activities')
-    activities.value = response.data.data
-    error.value = ''
+    if (response.data?.status === 'success' && response.data?.data) {
+      activities.value = response.data.data
+      error.value = ''
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      activities.value = []
+      error.value = 'Unexpected response format from server'
+    }
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load activities'
     console.error('Error fetching activities:', err)
+    activities.value = []
   }
 }
 
 async function fetchPeople() {
   try {
     const response = await axios.get('/api/people')
-    people.value = response.data.data
+    if (response.data?.status === 'success' && response.data?.data) {
+      people.value = response.data.data
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      people.value = []
+    }
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load people'
     console.error('Error fetching people:', err)
+    people.value = []
   }
 }
 
@@ -329,16 +342,21 @@ async function addActivity() {
       end_time: newActivity.value.end_time
     })
     
-    activities.value.push(response.data.data)
-    showAddForm.value = false
-    newActivity.value = {
-      name: '',
-      person_id: '',
-      day_of_week: '',
-      start_time: '',
-      end_time: ''
+    if (response.data?.status === 'success' && response.data?.data) {
+      activities.value.push(response.data.data)
+      showAddForm.value = false
+      newActivity.value = {
+        name: '',
+        person_id: '',
+        day_of_week: '',
+        start_time: '',
+        end_time: ''
+      }
+      error.value = ''
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to add activity: unexpected response format'
     }
-    error.value = ''
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to add activity'
     console.error('Error adding activity:', err)
@@ -373,13 +391,17 @@ async function updateActivity() {
       end_time: editingActivity.value.end_time
     })
     
-    const index = activities.value.findIndex(a => a.id === editingActivity.value.id)
-    if (index > -1) {
-      activities.value[index] = response.data.data
+    if (response.data?.status === 'success' && response.data?.data) {
+      const index = activities.value.findIndex(a => a.id === editingActivity.value.id)
+      if (index > -1) {
+        activities.value[index] = response.data.data
+      }
+      editingActivity.value = null
+      error.value = ''
+    } else {
+      console.warn('Unexpected API response format:', response.data)
+      error.value = 'Failed to update activity: unexpected response format'
     }
-    
-    editingActivity.value = null
-    error.value = ''
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to update activity'
     console.error('Error updating activity:', err)
