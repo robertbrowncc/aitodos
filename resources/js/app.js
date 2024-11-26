@@ -4,8 +4,12 @@ import router from './router';
 import App from './components/App.vue';
 import axios from 'axios';
 
-// Set the base URL for all axios requests
-axios.defaults.baseURL = 'https://aitodos.test';
+// Set the base URL for all axios requests based on environment
+const baseURL = import.meta.env.VITE_APP_ENV === 'local' 
+    ? 'https://aitodos.test'
+    : window.location.origin;
+
+axios.defaults.baseURL = baseURL;
 
 // Add CSRF token and other required headers to all requests
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
