@@ -1,17 +1,19 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="mb-6 flex justify-between items-center">
-      <h1 class="text-3xl font-bold text-gray-900">Activities</h1>
-      <div class="space-x-4">
-        <button @click="expandAll" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
-          Expand All (E)
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Activities</h1>
+      <div class="flex flex-wrap justify-center sm:justify-end gap-2 sm:space-x-4 w-full sm:w-auto">
+        <button @click="expandAll" class="px-3 sm:px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm sm:text-base whitespace-nowrap">
+          <span class="hidden sm:inline">Expand All</span>
+          <span class="sm:hidden">Expand</span> (E)
         </button>
-        <button @click="collapseAll" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
-          Collapse All (C)
+        <button @click="collapseAll" class="px-3 sm:px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm sm:text-base whitespace-nowrap">
+          <span class="hidden sm:inline">Collapse All</span>
+          <span class="sm:hidden">Collapse</span> (C)
         </button>
         <button
           @click="showAddForm = true"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm sm:text-base whitespace-nowrap"
         >
           Add Activity
         </button>
@@ -177,55 +179,64 @@
     </div>
 
     <!-- Activities List -->
-    <div class="space-y-6">
-      <div v-for="day in daysOfWeek" :key="day" class="border rounded-lg overflow-hidden">
+    <div class="space-y-4">
+      <div v-for="day in daysOfWeek" :key="day" class="bg-white rounded-lg shadow">
         <div
           @click="toggleDay(day)"
-          class="bg-gray-100 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-200"
+          class="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
         >
-          <h2 class="text-xl font-semibold">{{ day }}</h2>
-          <span class="text-gray-500">
-            {{ groupedActivities[day]?.length || 0 }} activities
-          </span>
-        </div>
-        
-        <div v-if="expandedDays[day] && groupedActivities[day]" class="divide-y">
-          <div
-            v-for="activity in groupedActivities[day]"
-            :key="activity.id"
-            class="px-4 py-3 hover:bg-gray-50"
-          >
-            <div class="flex justify-between items-center">
-              <div>
-                <h3 class="font-medium">{{ activity.name }}</h3>
-                <p class="text-sm text-gray-600">
-                  {{ activity.person?.name || 'No person assigned' }} |
-                  {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}
-                </p>
-              </div>
-              <div class="space-x-2">
-                <button
-                  @click="startEdit(activity)"
-                  class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                >
-                  Edit
-                </button>
-                <button
-                  @click="deleteActivity(activity)"
-                  class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+          <h2 class="text-lg sm:text-xl font-semibold">{{ day }}</h2>
+          <div class="flex items-center space-x-2">
+            <span class="text-gray-500 text-sm">{{ groupedActivities[day]?.length || 0 }} activities</span>
+            <svg
+              class="w-5 h-5 transform transition-transform"
+              :class="{ 'rotate-180': expandedDays[day] }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
         </div>
         
-        <div
-          v-else-if="expandedDays[day] && (!groupedActivities[day] || groupedActivities[day].length === 0)"
-          class="px-4 py-3 text-gray-500"
-        >
-          No activities scheduled for this day
+        <div v-if="expandedDays[day]" class="p-4 border-t border-gray-100">
+          <div v-if="groupedActivities[day]?.length" class="space-y-3">
+            <div
+              v-for="activity in groupedActivities[day]"
+              :key="activity.id"
+              class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-gray-50 rounded"
+            >
+              <div class="flex flex-col sm:flex-row sm:items-center mb-2 sm:mb-0">
+                <span class="font-medium mr-2">{{ activity.name }}</span>
+                <span class="text-sm text-gray-600">
+                  with {{ activity.person?.name }}
+                </span>
+              </div>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                <span class="text-sm text-gray-600 whitespace-nowrap">
+                  {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}
+                </span>
+                <div class="flex space-x-2 w-full sm:w-auto justify-start sm:justify-end">
+                  <button
+                    @click="startEdit(activity)"
+                    class="px-3 py-1.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 flex-1 sm:flex-none"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    @click="deleteActivity(activity)"
+                    class="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600 flex-1 sm:flex-none"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-gray-500 text-center py-4">
+            No activities scheduled for {{ day }}
+          </div>
         </div>
       </div>
     </div>

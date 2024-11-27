@@ -1,18 +1,18 @@
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col items-center pt-4">
-    <div class="relative sm:max-w-4xl sm:mx-auto">
-      <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+    <div class="relative w-full max-w-4xl mx-auto px-4 sm:px-6">
+      <div class="relative py-8 px-6 sm:px-12 bg-white shadow-lg sm:rounded-3xl">
         <div class="mx-auto">
           <div class="divide-y divide-gray-200">
-            <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-              <h2 class="text-3xl font-bold text-center mb-4 text-blue-600">Manage the Shizzle Bizzle</h2>
-              <p class="text-center text-gray-600">{{ currentDate }}</p>
+            <div class="py-4 sm:py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+              <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4 text-blue-600">Manage the Shizzle Bizzle</h2>
+              <p class="text-center text-sm sm:text-base text-gray-600">{{ currentDate }}</p>
               <div class="mb-6">
                 <h3 class="text-lg font-semibold text-blue-700 mb-3">📅 Today's Activities</h3>
                 <div v-if="todayActivities.length > 0" class="space-y-2">
                   <div v-for="activity in todayActivities" :key="activity.id" 
-                       class="flex items-center justify-between p-3 bg-blue-50 rounded-lg shadow-sm">
-                    <div class="flex items-center space-x-3">
+                       class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-blue-50 rounded-lg shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2 sm:mb-0">
                       <span class="font-medium text-gray-700">{{ activity.name }}</span>
                       <span class="text-sm text-gray-500">with {{ activity.person?.name }}</span>
                     </div>
@@ -27,38 +27,38 @@
                 </div>
               </div>
               <div class="mt-5">
-                <div class="grid grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   <router-link 
                     to="/checklists" 
-                    class="flex flex-col items-center justify-center p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <span class="text-3xl mb-2">✅</span>
-                    <span class="text-base">Checklists</span>
+                    <span class="text-2xl sm:text-3xl mb-2">✅</span>
+                    <span class="text-sm sm:text-base">Checklists</span>
                   </router-link>
                   <router-link 
                     to="/todos" 
-                    class="flex flex-col items-center justify-center p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <span class="text-3xl mb-2">📋</span>
-                    <span class="text-base">Todos</span>
+                    <span class="text-2xl sm:text-3xl mb-2">📋</span>
+                    <span class="text-sm sm:text-base">Todos</span>
                   </router-link>
                   <router-link 
                     to="/people" 
-                    class="flex flex-col items-center justify-center p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                   >
-                    <span class="text-3xl mb-2">👥</span>
-                    <span class="text-base">People</span>
+                    <span class="text-2xl sm:text-3xl mb-2">👥</span>
+                    <span class="text-sm sm:text-base">People</span>
                   </router-link>
                   <router-link 
                     to="/activities" 
-                    class="flex flex-col items-center justify-center p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
                   >
-                    <span class="text-3xl mb-2">🎯</span>
-                    <span class="text-base">Activities</span>
+                    <span class="text-2xl sm:text-3xl mb-2">🎯</span>
+                    <span class="text-sm sm:text-base">Activities</span>
                   </router-link>
                 </div>
               </div>
-              <div class="mt-8 grid grid-cols-3 gap-4">
+              <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="col-span-1">
                   <WeatherWidget />
                 </div>
