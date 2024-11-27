@@ -7,7 +7,25 @@
             <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
               <h2 class="text-3xl font-bold text-center mb-4 text-blue-600">Manage the Shizzle Bizzle</h2>
               <p class="text-center text-gray-600">{{ currentDate }}</p>
-              <p class="text-center text-gray-600 mb-8">Your all-in-one solution for managing tasks, checklists, and team activities.</p>
+              <div class="mb-6">
+                <h3 class="text-lg font-semibold text-blue-700 mb-3">📅 Today's Activities</h3>
+                <div v-if="todayActivities.length > 0" class="space-y-2">
+                  <div v-for="activity in todayActivities" :key="activity.id" 
+                       class="flex items-center justify-between p-3 bg-blue-50 rounded-lg shadow-sm">
+                    <div class="flex items-center space-x-3">
+                      <span class="font-medium text-gray-700">{{ activity.name }}</span>
+                      <span class="text-sm text-gray-500">with {{ activity.person?.name }}</span>
+                    </div>
+                    <span class="text-sm text-blue-600 whitespace-nowrap">
+                      {{ formatTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}
+                    </span>
+                  </div>
+                </div>
+                <div v-else class="p-4 bg-blue-50 rounded-lg text-center">
+                  <span class="text-2xl">🎉</span>
+                  <p class="text-blue-700 font-medium mt-2">Hooray! No activities scheduled for today!</p>
+                </div>
+              </div>
               <div class="mt-5">
                 <div class="grid grid-cols-4 gap-4">
                   <router-link 
@@ -75,6 +93,7 @@ import axios from 'axios';
 
 const upcomingBirthdays = ref([]);
 const currentDate = ref('');
+const todayActivities = ref([]);
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -82,6 +101,14 @@ function formatDate(dateString) {
     month: 'short',
     day: 'numeric'
   }).format(date);
+}
+
+function formatTime(timeString) {
+  return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
 }
 
 const updateDate = () => {
@@ -113,8 +140,23 @@ async function fetchUpcomingBirthdays() {
   }
 }
 
+const fetchTodayActivities = async () => {
+  try {
+    const response = await axios.get('/api/activities');
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }); // Returns "Wednesday", "Thursday", etc.
+    
+    todayActivities.value = response.data.data.filter(activity => 
+      activity.day_of_week === today
+    ).sort((a, b) => a.start_time.localeCompare(b.start_time));
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    todayActivities.value = [];
+  }
+};
+
 onMounted(() => {
   startClock();
   fetchUpcomingBirthdays();
+  fetchTodayActivities();
 });
 </script>
