@@ -6,6 +6,7 @@
           <div class="divide-y divide-gray-200">
             <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
               <h2 class="text-3xl font-bold text-center mb-4 text-blue-600">Manage the Shizzle Bizzle</h2>
+              <p class="text-center text-gray-600">{{ currentDate }}</p>
               <p class="text-center text-gray-600 mb-8">Your all-in-one solution for managing tasks, checklists, and team activities.</p>
               <div class="mt-5">
                 <div class="grid grid-cols-4 gap-4">
@@ -73,6 +74,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const upcomingBirthdays = ref([]);
+const currentDate = ref('');
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -81,6 +83,24 @@ function formatDate(dateString) {
     day: 'numeric'
   }).format(date);
 }
+
+const updateDate = () => {
+  const now = new Date();
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  currentDate.value = new Intl.DateTimeFormat('en-US', options).format(now);
+};
+
+const startClock = () => {
+  updateDate();
+  setInterval(updateDate, 60000);
+};
 
 async function fetchUpcomingBirthdays() {
   try {
@@ -94,6 +114,7 @@ async function fetchUpcomingBirthdays() {
 }
 
 onMounted(() => {
+  startClock();
   fetchUpcomingBirthdays();
 });
 </script>
