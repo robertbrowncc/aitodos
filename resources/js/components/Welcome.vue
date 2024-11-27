@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col items-center pt-4">
-    <div class="relative w-full max-w-4xl mx-auto px-4 sm:px-6">
+    <div class="relative w-full max-w-6xl mx-auto px-4 sm:px-6">
       <div class="relative py-8 px-6 sm:px-12 bg-white shadow-lg sm:rounded-3xl">
         <div class="mx-auto">
           <div class="divide-y divide-gray-200">
@@ -58,18 +58,26 @@
                   </router-link>
                 </div>
               </div>
-              <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div class="col-span-1">
                   <WeatherWidget />
                 </div>
                 <div v-if="upcomingBirthdays.length > 0" class="col-span-1 p-4 bg-pink-50 rounded-xl h-full">
-                  <h3 class="text-lg font-semibold text-pink-700 mb-3">🎂 Upcoming Birthdays</h3>
+                  <h3 class="text-lg font-semibold text-pink-700 mb-3">🎂 Birthdays</h3>
                   <div class="space-y-2">
-                    <div v-for="person in upcomingBirthdays" :key="person.id" class="flex items-center justify-between p-2 bg-white rounded-lg shadow-sm">
-                      <span class="font-medium text-gray-700 truncate mr-2 flex-shrink">{{ person.name }}</span>
-                      <span class="text-sm text-pink-600 whitespace-nowrap flex-shrink-0">
-                        {{ formatDate(person.date_of_birth) }}
-                      </span>
+                    <div v-for="person in upcomingBirthdays" :key="person.id" 
+                         :class="[
+                           'flex items-center justify-between p-2 rounded-lg shadow-sm',
+                           isBirthdayToday(person.date_of_birth) ? 'bg-pink-100 border-2 border-pink-300' : 'bg-white'
+                         ]">
+                      <div class="flex-grow">
+                        <span class="font-medium text-gray-800" :title="person.name">{{ truncateName(person.name) }}</span>
+                        <span class="ml-2 text-sm text-gray-600">({{ calculateAge(person.date_of_birth) }})</span>
+                      </div>
+                      <div class="text-sm text-pink-600 flex flex-col items-end">
+                        <span>{{ formatDate(person.date_of_birth) }}</span>
+                        <span class="text-xs mt-0.5" v-if="isBirthdayToday(person.date_of_birth)">Today! 🎉</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -103,12 +111,38 @@ function formatDate(dateString) {
   }).format(date);
 }
 
+function calculateAge(birthDate) {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+}
+
+function isBirthdayToday(birthDate) {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  return today.getMonth() === birth.getMonth() && 
+         today.getDate() === birth.getDate();
+}
+
 function formatTime(timeString) {
   return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true
   });
+}
+
+function truncateName(name) {
+  const maxLength = 15;
+  if (name.length <= maxLength) return name;
+  return `${name.substring(0, maxLength)}...`;
 }
 
 const updateDate = () => {

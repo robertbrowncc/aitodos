@@ -69,19 +69,28 @@ class PersonController extends Controller
                 $birthday = Carbon::parse($person->date_of_birth)->setYear($today->year);
                 
                 // If birthday has passed this year, look at next year's birthday
-                if ($birthday->isPast()) {
+                if ($birthday->isPast() && !$birthday->isToday()) {
                     $birthday->addYear();
                 }
                 
+                $daysUntil = $today->diffInDays($birthday, false);
+                
                 return [
                     'person' => $person,
-                    'days_until' => $today->diffInDays($birthday, false)
+                    'days_until' => $daysUntil,
+                    'is_today' => $birthday->isToday()
                 ];
             })
             ->filter(function ($item) {
+                // Include birthdays that are today (days_until = 0) or in the future
                 return $item['days_until'] >= 0;
             })
-            ->sortBy('days_until')
+            ->sortBy([
+                // Sort by is_today first (true comes first)
+                ['is_today', 'desc'],
+                // Then by days until
+                ['days_until', 'asc']
+            ])
             ->take(4);
 
         return $this->resourceResponse(

@@ -192,14 +192,53 @@
               <div v-else>
                 <!-- View Mode -->
                 <div class="flex justify-between items-start">
-                  <div>
+                  <div class="space-y-2">
                     <h3 class="text-lg font-semibold">{{ person.name }}</h3>
-                    <div v-if="person.email" class="text-gray-600">{{ person.email }}</div>
-                    <div v-if="person.phone" class="text-gray-600">{{ person.phone }}</div>
-                    <div v-if="person.date_of_birth" class="text-gray-600">
-                      Born: {{ new Date(person.date_of_birth).toLocaleDateString() }}
+                    
+                    <div v-if="person.email" class="flex items-center text-gray-600">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <a :href="'mailto:' + person.email" class="hover:text-blue-600 hover:underline">
+                        {{ person.email }}
+                      </a>
                     </div>
-                    <div v-if="person.address" class="text-gray-600 mt-2">{{ person.address }}</div>
+                    
+                    <div v-if="person.phone" class="flex items-center text-gray-600">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <a :href="'tel:' + person.phone" class="hover:text-blue-600 hover:underline">
+                        {{ person.phone }}
+                      </a>
+                    </div>
+                    
+                    <div v-if="person.address" class="flex items-center text-gray-600">
+                      <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <a 
+                        :href="'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(person.address)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="hover:text-blue-600 hover:underline"
+                      >
+                        {{ person.address }}
+                      </a>
+                    </div>
+                    
+                    <div v-if="person.date_of_birth" class="flex items-center text-gray-600">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>Born: {{ new Date(person.date_of_birth).toLocaleDateString() }}</span>
+                    </div>
                   </div>
                   <div class="flex space-x-2">
                     <button 
@@ -276,7 +315,12 @@ const groupedPeople = computed(() => {
 const scrollToLetter = (letter) => {
   const element = document.getElementById('letter-' + letter)
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
+    const offset = 100 // Offset to account for sticky header and navigation
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+    window.scrollTo({
+      top: elementPosition - offset,
+      behavior: 'smooth'
+    })
     currentLetter.value = letter
   }
 }
